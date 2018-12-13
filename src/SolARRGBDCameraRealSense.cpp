@@ -55,7 +55,7 @@ FrameworkReturnCode RGBDCamera::getNextDepthFrame(const SRef<Image>& depthImg, c
     return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode RGBDCamera::getNextRGBDFrame(const SRef<Image>& colorImg, const SRef<Image>& depthImg, const SRef<PointCloud>& pc, const SRef<Image>& alignedColorImg, const SRef<Image>& alignedDepthImg) const
+FrameworkReturnCode RGBDCamera::getNextRGBDFrame(const SRef<Image>& colorImg, const SRef<Image>& depthImg, const SRef<PointCloud>& pc) const
 {
     return FrameworkReturnCode::_SUCCESS;
 
@@ -64,6 +64,30 @@ FrameworkReturnCode RGBDCamera::getNextRGBDFrame(const SRef<Image>& colorImg, co
 FrameworkReturnCode RGBDCamera::start()
 {
     return FrameworkReturnCode::_SUCCESS;
+
+}
+
+FrameworkReturnCode RGBDCamera::alignDepthToColor (SRef<Image>& alignedDepthImg) const
+{
+   return FrameworkReturnCode::_SUCCESS;
+
+}
+
+FrameworkReturnCode RGBDCamera::alignColorToDepth (SRef<Image>& alignedColorImg) const
+{
+   return FrameworkReturnCode::_SUCCESS;
+
+}
+
+Point3Df RGBDCamera::getPixelToWorld (const Point2Di& inPixel) const
+{
+   return FrameworkReturnCode::_SUCCESS;
+
+}
+
+Point2Di RGBDCamera::getWorldToPixel (const Point3Df& in3DPoint) const
+{
+   return FrameworkReturnCode::_SUCCESS;
 
 }
 
