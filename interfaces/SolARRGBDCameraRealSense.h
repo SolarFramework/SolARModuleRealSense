@@ -51,7 +51,7 @@ public:
     /// @param depthImg the image captured by the RGBD camera
     /// @param pc the 3D point cloud reconstructed from the depth image. Points coordinates are defined according to the RGBD camera coordinate system.
     /// @return FrameworkReturnCode to track sucessful or failing event.
-    FrameworkReturnCode getNextDepthFrame(const SRef<Image>& depthImg, const SRef<PointCloud>& pc) const override;
+    FrameworkReturnCode getNextDepthFrame(SRef<Image>& depthImg, SRef<PointCloud>& pc) const override;
 
     /// @brief Provides the last color image, depth image, corresponding 3D point cloud, and aligned images (RGB on depth and depth on RGB).
     /// If output parameters are null (nullptr), it means that the implementation, or the requested mode does not provide this feature.
@@ -59,7 +59,7 @@ public:
     /// @param depthImg the depth image captured by the RGBD camera
     /// @param pc the 3D point cloud reconstructed from the depth image. Points coordinates are defined according to the RGBD camera coordinate system.
     /// @return FrameworkReturnCode to track sucessful or failing event.
-    FrameworkReturnCode getNextRGBDFrame(const SRef<Image>& colorImg, const SRef<Image>& depthImg, const SRef<PointCloud>& pc) const  override;
+    FrameworkReturnCode getNextRGBDFrame(SRef<Image>& colorImg, SRef<Image>& depthImg, SRef<PointCloud>& pc) const  override;
 
     /// @brief Start the acquisition device reference by its device_id
     /// @return FrameworkReturnCode to track sucessful or failing event.
