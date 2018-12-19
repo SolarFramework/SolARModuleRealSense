@@ -71,9 +71,13 @@ public:
     FrameworkReturnCode getPointCloud(SRef<PointCloud>& pc) override;
 
 
-    /// @brief Start the acquisition device reference by its device_id
+    /// @brief Start the acquisition device reference
     /// @return FrameworkReturnCode to track sucessful or failing event.
     FrameworkReturnCode start() override ;
+
+    /// @brief Start the acquisition device reference
+    /// @return FrameworkReturnCode to track sucessful or failing event.
+    FrameworkReturnCode startRGBD() override ;
 
     /// @brief Provides a depth image alingned on the color image
     /// @param alignedDepthImg the depth image captured by the RGBD camera and aligned on the color image
@@ -106,7 +110,7 @@ public:
 	FrameworkReturnCode setIntrinsicDepthParameters(const CamCalibration & intrinsic_parameters) override ;
 
     /// @brief Set the distortion intrinsic parameters of the RGB camera
-	FrameworkReturnCode setDistortionParameters(const CamDistortion & distortion_parameters) override ;
+    FrameworkReturnCode setDistortionParameters(const CamDistortion & distortion_parameters) override ;
 
     /// @brief Set the distortion intrinsic parameters of the depth camera
 	FrameworkReturnCode setDistortionDepthParameters(const CamDistortion & distortion_parameters) override ;
