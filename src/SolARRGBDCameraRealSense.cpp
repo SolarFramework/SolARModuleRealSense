@@ -186,7 +186,12 @@ namespace SolAR {
 			}
 
 
-			FrameworkReturnCode RGBDCamera::start()
+            FrameworkReturnCode RGBDCamera::start()
+            {
+                return FrameworkReturnCode::_NOT_IMPLEMENTED;
+            }
+
+            FrameworkReturnCode RGBDCamera::startRGBD()
 			{
 				try
 				{
