@@ -29,7 +29,7 @@ class RGBDCamera;
 
 XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::REALSENSE::RGBDCamera,
                              "315dfef4-26f3-4a79-a809-874b1006cd88",
-                             "SolARRGBDCamera",
+                             "RGBDCamera",
                              "A component to handle a Real Sense RGBD Camera")
 
 #endif // SOLARMODULEREALSENSE_TRAITS_H
