@@ -210,7 +210,7 @@ namespace SolAR {
 						const auto rgbWidth = requested_rgb_size.width;
 						const auto rgbHeight = requested_rgb_size.height;
 						LOG_INFO("-> Enabling rgb stream resolution {}x{}", rgbWidth, rgbHeight);
-						config.enable_stream(RS2_STREAM_COLOR, rgbWidth, rgbHeight, RS2_FORMAT_RGB8, 30);
+                        config.enable_stream(RS2_STREAM_COLOR, rgbWidth, rgbHeight, RS2_FORMAT_BGR8, 30);
 
 						const auto depthWidth = requested_depth_size.width;
 						const auto depthHeight = requested_depth_size.height;
