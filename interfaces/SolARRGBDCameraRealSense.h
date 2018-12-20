@@ -97,6 +97,11 @@ public:
     /// @return a 2D point representing a pixel of the color image on which the 3D point in projected
     virtual Point2Di getWorldToPixel (const Point3Df& in3DPoint) const override;
 
+    /// @brief Provides the pixels of the color image to the projection of given 3D points
+    /// @param in3DPoints The 3D points we want to project on the color image
+    /// @return a 2D points vector representing the pixels of the color image on which the 3D points are projected
+    virtual std::vector<Point2Di> getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const override;
+
     /// @brief Set the color image resolution of the acquisition device
 	FrameworkReturnCode setResolution(Sizei resolution) override;
 
@@ -196,9 +201,9 @@ private:
 	Sizei requested_depth_size{ 640, 480 };
 
 
-	// Flags 
+	// Flags
 
-	/// True if at least a stream is opened 
+	/// True if at least a stream is opened
 	bool m_is_opened = false;
 
 
@@ -210,7 +215,7 @@ private:
 	/// Realsense pipeline
     rs2::pipeline m_pipe;
 
-	/// Last frameset available 
+	/// Last frameset available
     rs2::frameset m_frameset;
 	/// Last depth frame available
 	rs2::frame m_last_depth_frame;

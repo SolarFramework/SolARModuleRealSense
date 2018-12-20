@@ -204,7 +204,7 @@ namespace SolAR {
 					rs2::pipeline_profile pipeline_profile;
 
 					// Get a snapshot of currently connected devices
-					auto list = m_context.query_devices(); 
+					auto list = m_context.query_devices();
 
 					if (list.size() > 0)
 					{
@@ -222,7 +222,7 @@ namespace SolAR {
 						LOG_INFO("-> Enabling depth stream resolution {}x{}", depthWidth, depthHeight);
 						config.enable_stream(RS2_STREAM_DEPTH, depthWidth, depthHeight, RS2_FORMAT_Z16, 30);
 
-						// Set camera stream as opened 
+						// Set camera stream as opened
 						m_is_opened = true;
 
 						// Start the pipeline on the first detected device
@@ -238,11 +238,11 @@ namespace SolAR {
 						return FrameworkReturnCode::_ERROR_;
 					}
 
-					// Setup intrinsics and distortion 
+					// Setup intrinsics and distortion
 					auto depth_stream = pipeline_profile.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
 					auto color_stream = pipeline_profile.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
 
-					// Raw data from RealSense			
+					// Raw data from RealSense
 					m_depth_intrin = depth_stream.get_intrinsics();
 					m_color_intrin = color_stream.get_intrinsics();
 
@@ -358,7 +358,17 @@ namespace SolAR {
 				return pixel;
 			}
 
+			std::vector<Point2Di> RGBDCamera::getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const
+			{
+				std::vector<Point2Di> out2DPoints;
 
+				for( const auto& pt : in3DPoints )
+				{
+					out2DPoints.push_back( getWorldToPixel( pt ) );
+				}
+
+				return out2DPoints;
+			}
 
 			void RGBDCamera::pixelToWorld(const uint16_t* pixels_depth,
 				const int w, const int h, const int i,
@@ -425,7 +435,7 @@ namespace SolAR {
 				if (!m_is_opened)
 					return { 0, 0 };
 
-				return { static_cast<uint32_t>(m_color_intrin.width), 
+				return { static_cast<uint32_t>(m_color_intrin.width),
 					static_cast<uint32_t>(m_color_intrin.height) };
 			}
 
@@ -434,7 +444,7 @@ namespace SolAR {
 				if (!m_is_opened)
 					return { 0, 0 };
 
-				return { static_cast<uint32_t>(m_depth_intrin.width), 
+				return { static_cast<uint32_t>(m_depth_intrin.width),
 					static_cast<uint32_t>(m_depth_intrin.height) };
 			}
 
