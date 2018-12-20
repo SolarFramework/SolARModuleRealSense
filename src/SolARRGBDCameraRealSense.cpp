@@ -26,448 +26,448 @@ namespace xpcf = org::bcom::xpcf;
 XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::REALSENSE::RGBDCamera)
 
 namespace SolAR {
-	using namespace datastructure;
-	namespace MODULES {
-		namespace REALSENSE {
+using namespace datastructure;
+namespace MODULES {
+namespace REALSENSE {
 
-			RGBDCamera::RGBDCamera() :ConfigurableBase(xpcf::toUUID<RGBDCamera>())
-			{
-				addInterface<api::input::devices::IRGBDCamera>(this);
-				SRef<xpcf::IPropertyMap> params = getPropertyRootNode();
-			}
+RGBDCamera::RGBDCamera() :ConfigurableBase(xpcf::toUUID<RGBDCamera>())
+{
+        addInterface<api::input::devices::IRGBDCamera>(this);
+        SRef<xpcf::IPropertyMap> params = getPropertyRootNode();
+}
 
-			org::bcom::xpcf::XPCFErrorCode RGBDCamera::onConfigured()
-			{
-				return xpcf::_SUCCESS;
-			}
+org::bcom::xpcf::XPCFErrorCode RGBDCamera::onConfigured()
+{
+        return xpcf::_SUCCESS;
+}
 
 
-			FrameworkReturnCode RGBDCamera::getNextImage(SRef<Image>& colorImg)
-			{
-				colorImg = nullptr;
-				return FrameworkReturnCode::_NOT_IMPLEMENTED;
-			}
+FrameworkReturnCode RGBDCamera::getNextImage(SRef<Image>& colorImg)
+{
+        colorImg = nullptr;
+        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
 
-			FrameworkReturnCode RGBDCamera::getNextDepthFrame(SRef<Image>& depthImg)
-			{
-				depthImg = nullptr;
-				return FrameworkReturnCode::_NOT_IMPLEMENTED;
-			}
+FrameworkReturnCode RGBDCamera::getNextDepthFrame(SRef<Image>& depthImg)
+{
+        depthImg = nullptr;
+        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
 
-			FrameworkReturnCode RGBDCamera::getNextRGBDFrame(SRef<Image>& colorImg,
-				SRef<Image>& depthImg)
-			{
-				if (!updateFrameset())
-					return FrameworkReturnCode::_ERROR_;
+FrameworkReturnCode RGBDCamera::getNextRGBDFrame(SRef<Image>& colorImg,
+        SRef<Image>& depthImg)
+{
+        if (!updateFrameset())
+                return FrameworkReturnCode::_ERROR_;
 
-				if (!fillRGBImage(colorImg))
-					return FrameworkReturnCode::_ERROR_;
+        if (!fillRGBImage(colorImg))
+                return FrameworkReturnCode::_ERROR_;
 
-				if (!fillDepthImage(depthImg))
-					return FrameworkReturnCode::_ERROR_;
+        if (!fillDepthImage(depthImg))
+                return FrameworkReturnCode::_ERROR_;
 
-				return FrameworkReturnCode::_SUCCESS;
-			}
+        return FrameworkReturnCode::_SUCCESS;
+}
 
-			FrameworkReturnCode RGBDCamera::getPointCloud(SRef<PointCloud> &outputPointCloud)
-			{
-				// See if it doesn't cost too much to do this
-				// otherwise just save the last depth frame
-				auto depth_frame = m_last_depth_frame;
+FrameworkReturnCode RGBDCamera::getPointCloud(SRef<PointCloud> &outputPointCloud)
+{
+        // See if it doesn't cost too much to do this
+        // otherwise just save the last depth frame
+        auto depth_frame = m_last_depth_frame;
 
-				if (!depth_frame) {
-					outputPointCloud = nullptr;
-					return FrameworkReturnCode::_ERROR_;
-				}
+        if (!depth_frame) {
+                outputPointCloud = nullptr;
+                return FrameworkReturnCode::_ERROR_;
+        }
 
-				rs2::pointcloud pointCloud;
+        rs2::pointcloud pointCloud;
 
-				// If we got a depth frame, generate the pointcloud and texture mappings
-				auto points = pointCloud.calculate(depth_frame);
-
-				auto vertices = points.get_vertices(); // get vertices
+        // If we got a depth frame, generate the pointcloud and texture mappings
+        auto points = pointCloud.calculate(depth_frame);
+
+        auto vertices = points.get_vertices(); // get vertices
 
-				outputPointCloud = xpcf::utils::make_shared<PointCloud>();
-				auto rawPointCloudData = outputPointCloud->getPointCloud();
+        outputPointCloud = xpcf::utils::make_shared<PointCloud>();
+        auto rawPointCloudData = outputPointCloud->getPointCloud();
 
-				rawPointCloudData.resize(points.size());
+        rawPointCloudData.resize(points.size());
 
-				for (auto i = 0u; i < points.size(); i++)
-				{
-                    auto& pt = rawPointCloudData.at(i);
-                    pt.setX(vertices[i].x);
-                    pt.setY(vertices[i].y);
-                    pt.setZ(vertices[i].z);
-				}
-
-				return  FrameworkReturnCode::_SUCCESS;
-			}
+        for (auto i = 0u; i < points.size(); i++)
+        {
+            auto& pt = rawPointCloudData.at(i);
+            pt.setX(vertices[i].x);
+            pt.setY(vertices[i].y);
+            pt.setZ(vertices[i].z);
+        }
+
+        return  FrameworkReturnCode::_SUCCESS;
+}
 
-			bool RGBDCamera::fillRGBImage(SRef<Image>& colorImg) {
-				auto rgb_frame = m_frameset.get_color_frame();
+bool RGBDCamera::fillRGBImage(SRef<Image>& colorImg) {
+        auto rgb_frame = m_frameset.get_color_frame();
 
-				if (!rgb_frame)
-					return false;
+        if (!rgb_frame)
+                return false;
 
-				colorImg = rgbFrameToImage(rgb_frame);
+        colorImg = rgbFrameToImage(rgb_frame);
 
-				return true;
-			}
+        return true;
+}
 
-			bool RGBDCamera::fillDepthImage(SRef<Image>& depthImg) {
-				// Save last depth frame to compute point could
-				m_last_depth_frame = m_frameset.get_depth_frame();
+bool RGBDCamera::fillDepthImage(SRef<Image>& depthImg) {
+        // Save last depth frame to compute point could
+        m_last_depth_frame = m_frameset.get_depth_frame();
 
-				if (!m_last_depth_frame)
-					return false;
+        if (!m_last_depth_frame)
+                return false;
 
-				depthImg = depthFrameToImage(m_last_depth_frame);
+        depthImg = depthFrameToImage(m_last_depth_frame);
 
-				return true;
-			}
+        return true;
+}
 
-			void RGBDCamera::CameraInformation::extractRSIntrinsics(const rs2_intrinsics& intrinsics)
-			{
-				// todo Not sure that fx and fy are the same in realsense or openCV
-				calibration(0, 0) = intrinsics.fx;
-				calibration(1, 1) = intrinsics.fy;
-
-				calibration(0, 2) = intrinsics.ppx;
-				calibration(1, 2) = intrinsics.ppy;
-
-				calibration(2, 2) = 1;
-
-				// Copy distortion parameters
-				// Realsense orders the parameters the same way than ours (k1, k2, p1, p2, k3)
-				std::copy(intrinsics.coeffs, intrinsics.coeffs + 5,
-					distortion.data());
-			}
-
-			bool RGBDCamera::updateFrameset()
-			{
-				if (!m_is_opened)
-					return false;
-
-				if (!m_pipe.try_wait_for_frames(&m_frameset, 1000U)) // 1s timeout
-				{
-					LOG_ERROR("RealSense::open - timeout waiting for live camera frame");
-					return false;
-				}
-
-				return true;
-			}
-
-			SRef<Image> RGBDCamera::rgbFrameToImage(const rs2::frame& frame)
-			{
-
-				auto video_frame = frame.as<rs2::video_frame>();
-
-				return xpcf::utils::make_shared<Image>(
-					(void*)video_frame.get_data(),
-					video_frame.get_width(),
-					video_frame.get_height(),
-					Image::ImageLayout::LAYOUT_RGB,
-					Image::PixelOrder::INTERLEAVED,
-					Image::DataType::TYPE_8U);
-			}
-
-			SRef<Image> RGBDCamera::depthFrameToImage(const rs2::frame& frame)
-			{
-
-				auto depth_frame = frame.as<rs2::depth_frame>();
-
-				return xpcf::utils::make_shared<Image>(
-					(void*)depth_frame.get_data(),
-					depth_frame.get_width(),
-					depth_frame.get_height(),
-					Image::ImageLayout::LAYOUT_GREY,
-					Image::PixelOrder::PER_CHANNEL,
-					Image::DataType::TYPE_16U);
-			}
-
-
-            FrameworkReturnCode RGBDCamera::start()
-            {
-                return FrameworkReturnCode::_NOT_IMPLEMENTED;
-            }
-
-            FrameworkReturnCode RGBDCamera::startRGBD()
-			{
-				try
-				{
-					// todo See if we get error code for already opened ?
-					if (m_is_opened)
-						return FrameworkReturnCode::_SUCCESS;
-
-
-					rs2::config config;
-					rs2::pipeline_profile pipeline_profile;
-
-					// Get a snapshot of currently connected devices
-					auto list = m_context.query_devices();
-
-					if (list.size() > 0)
-					{
-						const std::string device_name = list.front().get_info(RS2_CAMERA_INFO_NAME);
-
-						LOG_INFO("Opening the camera device : {} ", device_name);
-
-						const auto rgbWidth = requested_rgb_size.width;
-						const auto rgbHeight = requested_rgb_size.height;
-						LOG_INFO("-> Enabling rgb stream resolution {}x{}", rgbWidth, rgbHeight);
-                        config.enable_stream(RS2_STREAM_COLOR, rgbWidth, rgbHeight, RS2_FORMAT_BGR8, 30);
-
-						const auto depthWidth = requested_depth_size.width;
-						const auto depthHeight = requested_depth_size.height;
-						LOG_INFO("-> Enabling depth stream resolution {}x{}", depthWidth, depthHeight);
-						config.enable_stream(RS2_STREAM_DEPTH, depthWidth, depthHeight, RS2_FORMAT_Z16, 30);
-
-						// Set camera stream as opened
-						m_is_opened = true;
-
-						// Start the pipeline on the first detected device
-						pipeline_profile = m_pipe.start(config);
-
-						// Remember depth scale as it is used later
-						auto depth_sensor = pipeline_profile.get_device().first<rs2::depth_sensor>();
-						m_depth_scale = depth_sensor.get_depth_scale();
-					}
-					else
-					{
-						LOG_ERROR("No cam found. Please connect a camera to the laptop");
-						return FrameworkReturnCode::_ERROR_;
-					}
-
-					// Setup intrinsics and distortion
-					auto depth_stream = pipeline_profile.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
-					auto color_stream = pipeline_profile.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
-
-					// Raw data from RealSense
-					m_depth_intrin = depth_stream.get_intrinsics();
-					m_color_intrin = color_stream.get_intrinsics();
-
-					// Extract calibration and distortion matrix from raw data
-					m_depth_camera_information.extractRSIntrinsics(m_depth_intrin);
-					m_depth_camera_information.extractRSIntrinsics(m_color_intrin);
-
-					// Transformation matrix from RGB world to Depth world and vice versa
-					m_color_to_depth = color_stream.get_extrinsics_to(depth_stream);
-					m_depth_to_color = depth_stream.get_extrinsics_to(color_stream);
-
-					LOG_INFO("The camera device is now opened and configured");
-				}
-				catch (const rs2::error & e)
-				{
-					LOG_ERROR("RealSense::open - error calling {} ({}) : {}",
-						e.get_failed_function(), e.get_failed_args(), e.what());
-					// Don't forget to put the is opened flag to false in case of errors
-					m_is_opened = false;
-					return FrameworkReturnCode::_ERROR_;
-				}
-				catch (std::exception& e)
-				{
-					LOG_ERROR("error : {}", e.what());
-					// Don't forget to put the is opened flag to false in case of errors
-					m_is_opened = false;
-					return FrameworkReturnCode::_ERROR_;
-				}
-				catch (...)
-				{
-					LOG_ERROR("error : unknown error");
-					// Don't forget to put the is opened flag to false in case of errors
-					m_is_opened = false;
-					return FrameworkReturnCode::_ERROR_;
-				}
-
-				return FrameworkReturnCode::_SUCCESS;
-			}
-
-			FrameworkReturnCode RGBDCamera::alignDepthToColor(SRef<Image>& alignedDepthImg) const
-			{
-				if (m_frameset.size() == 0) {
-					alignedDepthImg = nullptr;
-					return FrameworkReturnCode::_ERROR_;
-				}
-
-				rs2::align align(RS2_STREAM_COLOR);
-				const auto rsDepthFrame = align.process(m_frameset).get_depth_frame();
-
-				alignedDepthImg = depthFrameToImage(rsDepthFrame);
-
-				return FrameworkReturnCode::_SUCCESS;
-			}
-
-			FrameworkReturnCode RGBDCamera::alignColorToDepth(SRef<Image>& alignedColorImg) const
-			{
-				if (m_frameset.size() == 0) {
-					alignedColorImg = nullptr;
-					return FrameworkReturnCode::_ERROR_;
-				}
-
-				rs2::align align(RS2_STREAM_DEPTH);
-				const auto rsColorFrame = align.process(m_frameset).get_color_frame();
-
-				alignedColorImg = rgbFrameToImage(rsColorFrame);
-
-				return FrameworkReturnCode::_SUCCESS;
-			}
-
-
-			Point3Df RGBDCamera::getPixelToWorld(const Point2Di& inPixel) const
-			{
-
-				Point3Df outputPoint;
-
-				if (m_frameset.size() == 0)
-					return outputPoint;
-
-				// rs2::align allows you to perform alignment of depth frames to others
-				rs2::align align(RS2_STREAM_COLOR);
-				auto aligned = align.process(m_frameset);
-				auto aligned_depth_frame = aligned.get_depth_frame();
-				const auto w = aligned_depth_frame.get_width();
-				const auto h = aligned_depth_frame.get_height();
-
-				const auto pixels_depth = static_cast<const uint16_t*>(aligned_depth_frame.get_data());
-
-				pixelToWorld(pixels_depth, w, h, inPixel.getX(), inPixel.getY(),
-					outputPoint);
-
-				return outputPoint;
-			}
-
-			Point2Di RGBDCamera::getWorldToPixel(const Point3Df& in3DPoint) const
-			{
-
-				Point2Di pixel;
-				if (m_color_intrin.width == 0 || m_color_intrin.height == 0) // intrinsics not initialized
-					return pixel;
-
-				float color_pixel[2];
-				float color_point[3];
-				float depth_point[3] = { in3DPoint.getX(),in3DPoint.getY(), in3DPoint.getZ() };
-				rs2_transform_point_to_point(color_point, &m_depth_to_color, depth_point);
-				rs2_project_point_to_pixel(color_pixel, &m_color_intrin, color_point);
-
-				const auto roundedX = static_cast<int>(round(color_pixel[0]));
-				const auto roundedY = static_cast<int>(round(color_pixel[1]));
-
-				pixel.setX(roundedX);
-				pixel.setY(roundedY);
-
-				return pixel;
-			}
-
-			std::vector<Point2Di> RGBDCamera::getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const
-			{
-				std::vector<Point2Di> out2DPoints;
-
-				for( const auto& pt : in3DPoints )
-				{
-					out2DPoints.push_back( getWorldToPixel( pt ) );
-				}
-
-				return out2DPoints;
-			}
-
-			void RGBDCamera::pixelToWorld(const uint16_t* pixels_depth,
-				const int w, const int h, const int i,
-				const int j, Point3Df& point) const
-			{
-				float color_point[3];
-				float depth_point[3];
-
-				const float color_pixel[2] = { static_cast<float>(i), static_cast<float>(j) };
-				const int inc = color_pixel[1] * w + color_pixel[0];
-
-				if (inc > -1 && inc < ((w - 1)*(h - 1)))
-				{
-					const auto color_value_in_color_frame = pixels_depth[inc];
-					const float distance = color_value_in_color_frame * m_depth_scale;
-					rs2_deproject_pixel_to_point(color_point, &m_color_intrin, color_pixel, distance);
-					rs2_transform_point_to_point(depth_point, &m_color_to_depth, color_point);
-
-					point.setX(depth_point[0]);
-					point.setY(depth_point[1]);
-					point.setZ(depth_point[2]);
-				}
-				else
-				{
-					point.setX(0);
-					point.setY(0);
-					point.setZ(0);
-				}
-			}
-
-
-			FrameworkReturnCode RGBDCamera::setResolution(Sizei resolution)
-			{
-				return FrameworkReturnCode::_NOT_IMPLEMENTED;
-			}
-
-			FrameworkReturnCode RGBDCamera::setDepthResolution(Sizei resolution)
-			{
-				return FrameworkReturnCode::_NOT_IMPLEMENTED;
-			}
-
-			FrameworkReturnCode RGBDCamera::setIntrinsicParameters(const CamCalibration & intrinsic_parameters)
-			{
-				return FrameworkReturnCode::_NOT_IMPLEMENTED;
-			}
-
-			FrameworkReturnCode RGBDCamera::setIntrinsicDepthParameters(const CamCalibration & intrinsic_parameters)
-			{
-				return FrameworkReturnCode::_NOT_IMPLEMENTED;
-			}
-
-			FrameworkReturnCode RGBDCamera::setDistortionParameters(const CamDistortion & distortion_parameters)
-			{
-				return FrameworkReturnCode::_NOT_IMPLEMENTED;
-			}
-
-			FrameworkReturnCode RGBDCamera::setDistortionDepthParameters(const CamDistortion & distortion_parameters)
-			{
-				return FrameworkReturnCode::_NOT_IMPLEMENTED;
-			}
-
-			Sizei RGBDCamera::getResolution()
-			{
-				if (!m_is_opened)
-					return { 0, 0 };
-
-				return { static_cast<uint32_t>(m_color_intrin.width),
-					static_cast<uint32_t>(m_color_intrin.height) };
-			}
-
-			Sizei RGBDCamera::getDepthResolution()
-			{
-				if (!m_is_opened)
-					return { 0, 0 };
-
-				return { static_cast<uint32_t>(m_depth_intrin.width),
-					static_cast<uint32_t>(m_depth_intrin.height) };
-			}
-
-			const CamCalibration& RGBDCamera::getIntrinsicsParameters() const
-			{
-				return m_rgb_camera_information.calibration;
-			}
-
-			const CamCalibration& RGBDCamera::getIntrinsicsDepthParameters() const
-			{
-				return m_depth_camera_information.calibration;
-			}
-
-			const CamDistortion& RGBDCamera::getDistortionParameters() const
-			{
-				return m_rgb_camera_information.distortion;
-			}
-
-			const CamDistortion& RGBDCamera::getDistortionDepthParameters() const
-			{
-				return m_depth_camera_information.distortion;
-			}
-
-		}
-	}
+void RGBDCamera::CameraInformation::extractRSIntrinsics(const rs2_intrinsics& intrinsics)
+{
+        // todo Not sure that fx and fy are the same in realsense or openCV
+        calibration(0, 0) = intrinsics.fx;
+        calibration(1, 1) = intrinsics.fy;
+
+        calibration(0, 2) = intrinsics.ppx;
+        calibration(1, 2) = intrinsics.ppy;
+
+        calibration(2, 2) = 1;
+
+        // Copy distortion parameters
+        // Realsense orders the parameters the same way than ours (k1, k2, p1, p2, k3)
+        std::copy(intrinsics.coeffs, intrinsics.coeffs + 5,
+                distortion.data());
+}
+
+bool RGBDCamera::updateFrameset()
+{
+        if (!m_is_opened)
+                return false;
+
+        if (!m_pipe.try_wait_for_frames(&m_frameset, 1000U)) // 1s timeout
+        {
+                LOG_ERROR("RealSense::open - timeout waiting for live camera frame");
+                return false;
+        }
+
+        return true;
+}
+
+SRef<Image> RGBDCamera::rgbFrameToImage(const rs2::frame& frame)
+{
+
+        auto video_frame = frame.as<rs2::video_frame>();
+
+        return xpcf::utils::make_shared<Image>(
+                (void*)video_frame.get_data(),
+                video_frame.get_width(),
+                video_frame.get_height(),
+                Image::ImageLayout::LAYOUT_RGB,
+                Image::PixelOrder::INTERLEAVED,
+                Image::DataType::TYPE_8U);
+}
+
+SRef<Image> RGBDCamera::depthFrameToImage(const rs2::frame& frame)
+{
+
+        auto depth_frame = frame.as<rs2::depth_frame>();
+
+        return xpcf::utils::make_shared<Image>(
+                (void*)depth_frame.get_data(),
+                depth_frame.get_width(),
+                depth_frame.get_height(),
+                Image::ImageLayout::LAYOUT_GREY,
+                Image::PixelOrder::PER_CHANNEL,
+                Image::DataType::TYPE_16U);
+}
+
+
+FrameworkReturnCode RGBDCamera::start()
+{
+    return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
+
+FrameworkReturnCode RGBDCamera::startRGBD()
+{
+    try
+    {
+        // todo See if we get error code for already opened ?
+        if (m_is_opened)
+                return FrameworkReturnCode::_SUCCESS;
+
+
+        rs2::config config;
+        rs2::pipeline_profile pipeline_profile;
+
+        // Get a snapshot of currently connected devices
+        auto list = m_context.query_devices();
+
+        if (list.size() > 0)
+        {
+            const std::string device_name = list.front().get_info(RS2_CAMERA_INFO_NAME);
+
+            LOG_INFO("Opening the camera device : {} ", device_name);
+
+            const auto rgbWidth = requested_rgb_size.width;
+            const auto rgbHeight = requested_rgb_size.height;
+            LOG_INFO("-> Enabling rgb stream resolution {}x{}", rgbWidth, rgbHeight);
+            config.enable_stream(RS2_STREAM_COLOR, rgbWidth, rgbHeight, RS2_FORMAT_BGR8, 30);
+
+            const auto depthWidth = requested_depth_size.width;
+            const auto depthHeight = requested_depth_size.height;
+            LOG_INFO("-> Enabling depth stream resolution {}x{}", depthWidth, depthHeight);
+            config.enable_stream(RS2_STREAM_DEPTH, depthWidth, depthHeight, RS2_FORMAT_Z16, 30);
+
+            // Set camera stream as opened
+            m_is_opened = true;
+
+            // Start the pipeline on the first detected device
+            pipeline_profile = m_pipe.start(config);
+
+            // Remember depth scale as it is used later
+            auto depth_sensor = pipeline_profile.get_device().first<rs2::depth_sensor>();
+            m_depth_scale = depth_sensor.get_depth_scale();
+        }
+        else
+        {
+            LOG_ERROR("No cam found. Please connect a camera to the laptop");
+            return FrameworkReturnCode::_ERROR_;
+        }
+
+        // Setup intrinsics and distortion
+        auto depth_stream = pipeline_profile.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
+        auto color_stream = pipeline_profile.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
+
+        // Raw data from RealSense
+        m_depth_intrin = depth_stream.get_intrinsics();
+        m_color_intrin = color_stream.get_intrinsics();
+
+        // Extract calibration and distortion matrix from raw data
+        m_depth_camera_information.extractRSIntrinsics(m_depth_intrin);
+        m_depth_camera_information.extractRSIntrinsics(m_color_intrin);
+
+        // Transformation matrix from RGB world to Depth world and vice versa
+        m_color_to_depth = color_stream.get_extrinsics_to(depth_stream);
+        m_depth_to_color = depth_stream.get_extrinsics_to(color_stream);
+
+        LOG_INFO("The camera device is now opened and configured");
+    }
+    catch (const rs2::error & e)
+    {
+            LOG_ERROR("RealSense::open - error calling {} ({}) : {}",
+                    e.get_failed_function(), e.get_failed_args(), e.what());
+            // Don't forget to put the is opened flag to false in case of errors
+            m_is_opened = false;
+            return FrameworkReturnCode::_ERROR_;
+    }
+    catch (std::exception& e)
+    {
+            LOG_ERROR("error : {}", e.what());
+            // Don't forget to put the is opened flag to false in case of errors
+            m_is_opened = false;
+            return FrameworkReturnCode::_ERROR_;
+    }
+    catch (...)
+    {
+            LOG_ERROR("error : unknown error");
+            // Don't forget to put the is opened flag to false in case of errors
+            m_is_opened = false;
+            return FrameworkReturnCode::_ERROR_;
+    }
+
+        return FrameworkReturnCode::_SUCCESS;
+}
+
+FrameworkReturnCode RGBDCamera::alignDepthToColor(SRef<Image>& alignedDepthImg) const
+{
+        if (m_frameset.size() == 0) {
+                alignedDepthImg = nullptr;
+                return FrameworkReturnCode::_ERROR_;
+        }
+
+        rs2::align align(RS2_STREAM_COLOR);
+        const auto rsDepthFrame = align.process(m_frameset).get_depth_frame();
+
+        alignedDepthImg = depthFrameToImage(rsDepthFrame);
+
+        return FrameworkReturnCode::_SUCCESS;
+}
+
+FrameworkReturnCode RGBDCamera::alignColorToDepth(SRef<Image>& alignedColorImg) const
+{
+        if (m_frameset.size() == 0) {
+                alignedColorImg = nullptr;
+                return FrameworkReturnCode::_ERROR_;
+        }
+
+        rs2::align align(RS2_STREAM_DEPTH);
+        const auto rsColorFrame = align.process(m_frameset).get_color_frame();
+
+        alignedColorImg = rgbFrameToImage(rsColorFrame);
+
+        return FrameworkReturnCode::_SUCCESS;
+}
+
+
+Point3Df RGBDCamera::getPixelToWorld(const Point2Di& inPixel) const
+{
+
+        Point3Df outputPoint;
+
+        if (m_frameset.size() == 0)
+                return outputPoint;
+
+        // rs2::align allows you to perform alignment of depth frames to others
+        rs2::align align(RS2_STREAM_COLOR);
+        auto aligned = align.process(m_frameset);
+        auto aligned_depth_frame = aligned.get_depth_frame();
+        const auto w = aligned_depth_frame.get_width();
+        const auto h = aligned_depth_frame.get_height();
+
+        const auto pixels_depth = static_cast<const uint16_t*>(aligned_depth_frame.get_data());
+
+        pixelToWorld(pixels_depth, w, h, inPixel.getX(), inPixel.getY(),
+                outputPoint);
+
+        return outputPoint;
+}
+
+Point2Di RGBDCamera::getWorldToPixel(const Point3Df& in3DPoint) const
+{
+
+        Point2Di pixel;
+        if (m_color_intrin.width == 0 || m_color_intrin.height == 0) // intrinsics not initialized
+                return pixel;
+
+        float color_pixel[2];
+        float color_point[3];
+        float depth_point[3] = { in3DPoint.getX(),in3DPoint.getY(), in3DPoint.getZ() };
+        rs2_transform_point_to_point(color_point, &m_depth_to_color, depth_point);
+        rs2_project_point_to_pixel(color_pixel, &m_color_intrin, color_point);
+
+        const auto roundedX = static_cast<int>(round(color_pixel[0]));
+        const auto roundedY = static_cast<int>(round(color_pixel[1]));
+
+        pixel.setX(roundedX);
+        pixel.setY(roundedY);
+
+        return pixel;
+}
+
+std::vector<Point2Di> RGBDCamera::getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const
+{
+        std::vector<Point2Di> out2DPoints;
+
+        for( const auto& pt : in3DPoints )
+        {
+                out2DPoints.push_back( getWorldToPixel( pt ) );
+        }
+
+        return out2DPoints;
+}
+
+void RGBDCamera::pixelToWorld(const uint16_t* pixels_depth,
+        const int w, const int h, const int i,
+        const int j, Point3Df& point) const
+{
+        float color_point[3];
+        float depth_point[3];
+
+        const float color_pixel[2] = { static_cast<float>(i), static_cast<float>(j) };
+        const int inc = color_pixel[1] * w + color_pixel[0];
+
+        if (inc > -1 && inc < ((w - 1)*(h - 1)))
+        {
+                const auto color_value_in_color_frame = pixels_depth[inc];
+                const float distance = color_value_in_color_frame * m_depth_scale;
+                rs2_deproject_pixel_to_point(color_point, &m_color_intrin, color_pixel, distance);
+                rs2_transform_point_to_point(depth_point, &m_color_to_depth, color_point);
+
+                point.setX(depth_point[0]);
+                point.setY(depth_point[1]);
+                point.setZ(depth_point[2]);
+        }
+        else
+        {
+                point.setX(0);
+                point.setY(0);
+                point.setZ(0);
+        }
+}
+
+
+FrameworkReturnCode RGBDCamera::setResolution(Sizei resolution)
+{
+        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
+
+FrameworkReturnCode RGBDCamera::setDepthResolution(Sizei resolution)
+{
+        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
+
+FrameworkReturnCode RGBDCamera::setIntrinsicParameters(const CamCalibration & intrinsic_parameters)
+{
+        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
+
+FrameworkReturnCode RGBDCamera::setIntrinsicDepthParameters(const CamCalibration & intrinsic_parameters)
+{
+        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
+
+FrameworkReturnCode RGBDCamera::setDistortionParameters(const CamDistortion & distortion_parameters)
+{
+        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
+
+FrameworkReturnCode RGBDCamera::setDistortionDepthParameters(const CamDistortion & distortion_parameters)
+{
+        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
+
+Sizei RGBDCamera::getResolution()
+{
+        if (!m_is_opened)
+                return { 0, 0 };
+
+        return { static_cast<uint32_t>(m_color_intrin.width),
+                static_cast<uint32_t>(m_color_intrin.height) };
+}
+
+Sizei RGBDCamera::getDepthResolution()
+{
+        if (!m_is_opened)
+                return { 0, 0 };
+
+        return { static_cast<uint32_t>(m_depth_intrin.width),
+                static_cast<uint32_t>(m_depth_intrin.height) };
+}
+
+const CamCalibration& RGBDCamera::getIntrinsicsParameters() const
+{
+        return m_rgb_camera_information.calibration;
+}
+
+const CamCalibration& RGBDCamera::getIntrinsicsDepthParameters() const
+{
+        return m_depth_camera_information.calibration;
+}
+
+const CamDistortion& RGBDCamera::getDistortionParameters() const
+{
+        return m_rgb_camera_information.distortion;
+}
+
+const CamDistortion& RGBDCamera::getDistortionDepthParameters() const
+{
+        return m_depth_camera_information.distortion;
+}
+
+}
+}
 }
