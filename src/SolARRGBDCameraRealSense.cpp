@@ -94,10 +94,10 @@ namespace SolAR {
 
 				for (auto i = 0u; i < points.size(); i++)
 				{
-					auto& pt = rawPointCloudData.at(i);
-					pt.setX(vertices[i].x);
-					pt.setY(vertices[i].y);
-					pt.setZ(vertices[i].z);
+                    auto& pt = rawPointCloudData.at(i);
+                    pt.setX(vertices[i].x);
+                    pt.setY(vertices[i].y);
+                    pt.setZ(vertices[i].z);
 				}
 
 				return  FrameworkReturnCode::_SUCCESS;
