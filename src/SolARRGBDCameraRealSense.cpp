@@ -88,7 +88,7 @@ FrameworkReturnCode RGBDCamera::getPointCloud(SRef<PointCloud> &outputPointCloud
         auto vertices = points.get_vertices(); // get vertices
 
         outputPointCloud = xpcf::utils::make_shared<PointCloud>();
-        auto rawPointCloudData = outputPointCloud->getPointCloud();
+        auto& rawPointCloudData = outputPointCloud->getPointCloud();
 
         rawPointCloudData.resize(points.size());
 
