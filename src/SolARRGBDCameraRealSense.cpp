@@ -87,7 +87,9 @@ FrameworkReturnCode RGBDCamera::getPointCloud(SRef<PointCloud> &outputPointCloud
 
         auto vertices = points.get_vertices(); // get vertices
 
-        outputPointCloud = xpcf::utils::make_shared<PointCloud>();
+        if (outputPointCloud == nullptr)
+            outputPointCloud = xpcf::utils::make_shared<PointCloud>();
+
         auto& rawPointCloudData = outputPointCloud->getPointCloud();
 
         rawPointCloudData.resize(points.size());
@@ -358,13 +360,14 @@ Point2Di RGBDCamera::getWorldToPixel(const Point3Df& in3DPoint) const
         return pixel;
 }
 
-std::vector<Point2Di> RGBDCamera::getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const
+std::vector<SRef<Point2Df>> RGBDCamera::getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const
 {
-        std::vector<Point2Di> out2DPoints;
+        std::vector<SRef<Point2Df>> out2DPoints;
 
         for( const auto& pt : in3DPoints )
         {
-                out2DPoints.push_back( getWorldToPixel( pt ) );
+            auto pti = getWorldToPixel( pt );
+            out2DPoints.push_back( xpcf::utils::make_shared<Point2Df>( pti.x(), pti.y() ) );
         }
 
         return out2DPoints;
