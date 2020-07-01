@@ -22,14 +22,15 @@ namespace xpcf=org::bcom::xpcf;
 
 XPCF_DECLARE_MODULE("63b92983-f790-448b-8124-3b686d481aaf", "SolARModuleRealSense", "SolARModuleRealSense")
 
-extern "C" XPCF_MODULEHOOKS_API xpcf::XPCFErrorCode XPCF_getComponent(const boost::uuids::uuid& componentUUID,SRef<xpcf::IComponentIntrospect>& interfaceRef)
+extern "C" XPCF_MODULEHOOKS_API xpcf::XPCFErrorCode XPCF_getComponent(const boost::uuids::uuid& componentUUID, SRef<xpcf::IComponentIntrospect>& interfaceRef)
 {
     xpcf::XPCFErrorCode errCode = xpcf::XPCFErrorCode::_FAIL;
-    errCode = xpcf::tryCreateComponent<SolAR::MODULES::REALSENSE::RGBDCamera>(componentUUID,interfaceRef);
+    errCode = xpcf::tryCreateComponent<SolAR::MODULES::REALSENSE::SolARRGBDCamera>(componentUUID,interfaceRef);
+
 
     return errCode;
 }
 
 XPCF_BEGIN_COMPONENTS_DECLARATION
-XPCF_ADD_COMPONENT(SolAR::MODULES::REALSENSE::RGBDCamera)
+XPCF_ADD_COMPONENT(SolAR::MODULES::REALSENSE::SolARRGBDCamera)
 XPCF_END_COMPONENTS_DECLARATION

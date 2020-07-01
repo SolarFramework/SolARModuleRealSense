@@ -33,12 +33,12 @@ namespace REALSENSE {
  * @class RGBDCamera
  * @brief This component handles a real sense RGBD camera and provides access to the color image, the depth image, and the 3D point cloud.
  */
-class SOLARREALSENSE_EXPORT_API RGBDCamera : public org::bcom::xpcf::ConfigurableBase,
+class SOLARREALSENSE_EXPORT_API SolARRGBDCamera : public org::bcom::xpcf::ConfigurableBase,
     public api::input::devices::IRGBDCamera
 {
 public:
-    RGBDCamera();
-    ~RGBDCamera()= default;
+	SolARRGBDCamera();
+    ~SolARRGBDCamera()= default;
 
     org::bcom::xpcf::XPCFErrorCode onConfigured() override;
 
@@ -75,6 +75,10 @@ public:
     /// @return FrameworkReturnCode to track sucessful or failing event.
     FrameworkReturnCode start() override ;
 
+	/// @brief Stop the acquisition device
+	/// @return FrameworkReturnCode::_SUCCESS if sucessful, eiher FrameworkRetunrnCode::_ERROR_.
+	FrameworkReturnCode stop() override;
+
     /// @brief Start the acquisition device reference
     /// @return FrameworkReturnCode to track sucessful or failing event.
     FrameworkReturnCode startRGBD() override ;
@@ -100,25 +104,26 @@ public:
     /// @brief Provides the pixels of the color image to the projection of given 3D points
     /// @param in3DPoints The 3D points we want to project on the color image
     /// @return a 2D points vector representing the pixels of the color image on which the 3D points are projected
-    virtual std::vector<SRef<Point2Df>> getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const override;
+    virtual std::vector<Point2Df> getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const override;
 
     /// @brief Set the color image resolution of the acquisition device
-	FrameworkReturnCode setResolution(Sizei resolution) override;
-
+	void setResolution(const Sizei & resolution) override;
     /// @brief Set the depth image resolution of the acquisition device
 	FrameworkReturnCode setDepthResolution(Sizei resolution) override;
 
     /// @brief Set the intrinsic RGB camera parameters
-	FrameworkReturnCode setIntrinsicParameters(const CamCalibration & intrinsic_parameters) override ;
-
+	void setIntrinsicParameters(const CamCalibration & intrinsic_parameters) override;
     /// @brief Set the intrinsic parameters of the depth camera
 	FrameworkReturnCode setIntrinsicDepthParameters(const CamCalibration & intrinsic_parameters) override ;
 
     /// @brief Set the distortion intrinsic parameters of the RGB camera
-    FrameworkReturnCode setDistortionParameters(const CamDistortion & distortion_parameters) override ;
+	void setDistorsionParameters(const CamDistortion & distorsion_parameters) override ;
 
     /// @brief Set the distortion intrinsic parameters of the depth camera
 	FrameworkReturnCode setDistortionDepthParameters(const CamDistortion & distortion_parameters) override ;
+
+	/// @brief Set the distorsion intrinsic camera parameters
+	void setParameters(const CameraParameters & parameters) override;
 
     /// @brief Get the image resolution of the RGB acquisition device
     Sizei getResolution() override ;
@@ -127,18 +132,21 @@ public:
     Sizei getDepthResolution() override ;
 
     /// @return Return the intrinsic RGB camera parameters
-    const CamCalibration& getIntrinsicsParameters() const override ;
+	const CamCalibration & getIntrinsicsParameters() override ;
+
+	/// @return Return the camera parameters
+	const CameraParameters & getParameters() override;
 
     /// @return Return the intrinsic depth camera parameters
     const CamCalibration& getIntrinsicsDepthParameters() const override ;
 
     /// @return Return the distortion RGB camera lens parameters
-    const CamDistortion& getDistortionParameters() const override ;
+	const CamDistortion & getDistorsionParameters() override ;
 
     /// @return Return the distortion depth camera lens parameters
     const CamDistortion& getDistortionDepthParameters() const override ;
 
-    void unloadComponent () override ;
+    void unloadComponent () override final;
 
 
 
@@ -231,7 +239,7 @@ private:
     rs2_extrinsics m_depth_to_color;
 
 	// SolAR
-
+	CameraParameters m_parameters;
 	/// Contains the calibration and distortion of a stream (rbg or depth)
 	struct CameraInformation
 	{

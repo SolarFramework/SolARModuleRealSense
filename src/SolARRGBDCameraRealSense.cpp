@@ -15,46 +15,45 @@
  */
 
 #include "SolARRGBDCameraRealSense.h"
-
 #include "datastructure/Image.h"
-
 #include <librealsense2/rsutil.h>
+#include "core/Log.h"
 
 namespace xpcf = org::bcom::xpcf;
 
 
-XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::REALSENSE::RGBDCamera)
+XPCF_DEFINE_FACTORY_CREATE_INSTANCE(SolAR::MODULES::REALSENSE::SolARRGBDCamera)
 
 namespace SolAR {
 using namespace datastructure;
 namespace MODULES {
 namespace REALSENSE {
 
-RGBDCamera::RGBDCamera() :ConfigurableBase(xpcf::toUUID<RGBDCamera>())
+SolARRGBDCamera::SolARRGBDCamera():ConfigurableBase(xpcf::toUUID<SolARRGBDCamera>())
 {
-        addInterface<api::input::devices::IRGBDCamera>(this);
-        SRef<xpcf::IPropertyMap> params = getPropertyRootNode();
+		declareInterface<api::input::devices::IRGBDCamera>(this);
+		LOG_DEBUG(" SolARRGBDCamera constructor");
 }
 
-org::bcom::xpcf::XPCFErrorCode RGBDCamera::onConfigured()
+org::bcom::xpcf::XPCFErrorCode SolARRGBDCamera::onConfigured()
 {
         return xpcf::_SUCCESS;
 }
 
 
-FrameworkReturnCode RGBDCamera::getNextImage(SRef<Image>& colorImg)
+FrameworkReturnCode SolARRGBDCamera::getNextImage(SRef<Image>& colorImg)
 {
         colorImg = nullptr;
         return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-FrameworkReturnCode RGBDCamera::getNextDepthFrame(SRef<Image>& depthImg)
+FrameworkReturnCode SolARRGBDCamera::getNextDepthFrame(SRef<Image>& depthImg)
 {
         depthImg = nullptr;
         return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-FrameworkReturnCode RGBDCamera::getNextRGBDFrame(SRef<Image>& colorImg,
+FrameworkReturnCode SolARRGBDCamera::getNextRGBDFrame(SRef<Image>& colorImg,
         SRef<Image>& depthImg)
 {
         if (!updateFrameset())
@@ -69,7 +68,7 @@ FrameworkReturnCode RGBDCamera::getNextRGBDFrame(SRef<Image>& colorImg,
         return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode RGBDCamera::getPointCloud(SRef<PointCloud> &outputPointCloud)
+FrameworkReturnCode SolARRGBDCamera::getPointCloud(SRef<PointCloud> &outputPointCloud)
 {
         // See if it doesn't cost too much to do this
         // otherwise just save the last depth frame
@@ -105,7 +104,7 @@ FrameworkReturnCode RGBDCamera::getPointCloud(SRef<PointCloud> &outputPointCloud
         return  FrameworkReturnCode::_SUCCESS;
 }
 
-bool RGBDCamera::fillRGBImage(SRef<Image>& colorImg) {
+bool SolARRGBDCamera::fillRGBImage(SRef<Image>& colorImg) {
         auto rgb_frame = m_frameset.get_color_frame();
 
         if (!rgb_frame)
@@ -116,7 +115,7 @@ bool RGBDCamera::fillRGBImage(SRef<Image>& colorImg) {
         return true;
 }
 
-bool RGBDCamera::fillDepthImage(SRef<Image>& depthImg) {
+bool SolARRGBDCamera::fillDepthImage(SRef<Image>& depthImg) {
         // Save last depth frame to compute point could
         m_last_depth_frame = m_frameset.get_depth_frame();
 
@@ -128,7 +127,7 @@ bool RGBDCamera::fillDepthImage(SRef<Image>& depthImg) {
         return true;
 }
 
-void RGBDCamera::CameraInformation::extractRSIntrinsics(const rs2_intrinsics& intrinsics)
+void SolARRGBDCamera::CameraInformation::extractRSIntrinsics(const rs2_intrinsics& intrinsics)
 {
         // todo Not sure that fx and fy are the same in realsense or openCV
         calibration(0, 0) = intrinsics.fx;
@@ -145,7 +144,7 @@ void RGBDCamera::CameraInformation::extractRSIntrinsics(const rs2_intrinsics& in
                 distortion.data());
 }
 
-bool RGBDCamera::updateFrameset()
+bool SolARRGBDCamera::updateFrameset()
 {
         if (!m_is_opened)
                 return false;
@@ -159,7 +158,7 @@ bool RGBDCamera::updateFrameset()
         return true;
 }
 
-SRef<Image> RGBDCamera::rgbFrameToImage(const rs2::frame& frame)
+SRef<Image> SolARRGBDCamera::rgbFrameToImage(const rs2::frame& frame)
 {
 
         auto video_frame = frame.as<rs2::video_frame>();
@@ -173,7 +172,7 @@ SRef<Image> RGBDCamera::rgbFrameToImage(const rs2::frame& frame)
                 Image::DataType::TYPE_8U);
 }
 
-SRef<Image> RGBDCamera::depthFrameToImage(const rs2::frame& frame)
+SRef<Image> SolARRGBDCamera::depthFrameToImage(const rs2::frame& frame)
 {
 
         auto depth_frame = frame.as<rs2::depth_frame>();
@@ -188,12 +187,17 @@ SRef<Image> RGBDCamera::depthFrameToImage(const rs2::frame& frame)
 }
 
 
-FrameworkReturnCode RGBDCamera::start()
+FrameworkReturnCode SolARRGBDCamera::start()
 {
     return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-FrameworkReturnCode RGBDCamera::startRGBD()
+FrameworkReturnCode SolARRGBDCamera::stop()
+{
+	return FrameworkReturnCode::_NOT_IMPLEMENTED;
+}
+
+FrameworkReturnCode SolARRGBDCamera::startRGBD()
 {
     try
     {
@@ -223,16 +227,18 @@ FrameworkReturnCode RGBDCamera::startRGBD()
             const auto depthHeight = requested_depth_size.height;
             LOG_INFO("-> Enabling depth stream resolution {}x{}", depthWidth, depthHeight);
             config.enable_stream(RS2_STREAM_DEPTH, depthWidth, depthHeight, RS2_FORMAT_Z16, 30);
-
+			LOG_INFO("check 1");
             // Set camera stream as opened
             m_is_opened = true;
-
+			LOG_INFO("check 2");
             // Start the pipeline on the first detected device
             pipeline_profile = m_pipe.start(config);
-
+			LOG_INFO("check 3");
             // Remember depth scale as it is used later
             auto depth_sensor = pipeline_profile.get_device().first<rs2::depth_sensor>();
+			LOG_INFO("check 4");
             m_depth_scale = depth_sensor.get_depth_scale();
+			LOG_INFO("check 5");
         }
         else
         {
@@ -284,7 +290,7 @@ FrameworkReturnCode RGBDCamera::startRGBD()
         return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode RGBDCamera::alignDepthToColor(SRef<Image>& alignedDepthImg) const
+FrameworkReturnCode SolARRGBDCamera::alignDepthToColor(SRef<Image>& alignedDepthImg) const
 {
         if (m_frameset.size() == 0) {
                 alignedDepthImg = nullptr;
@@ -299,7 +305,7 @@ FrameworkReturnCode RGBDCamera::alignDepthToColor(SRef<Image>& alignedDepthImg) 
         return FrameworkReturnCode::_SUCCESS;
 }
 
-FrameworkReturnCode RGBDCamera::alignColorToDepth(SRef<Image>& alignedColorImg) const
+FrameworkReturnCode SolARRGBDCamera::alignColorToDepth(SRef<Image>& alignedColorImg) const
 {
         if (m_frameset.size() == 0) {
                 alignedColorImg = nullptr;
@@ -315,7 +321,7 @@ FrameworkReturnCode RGBDCamera::alignColorToDepth(SRef<Image>& alignedColorImg) 
 }
 
 
-Point3Df RGBDCamera::getPixelToWorld(const Point2Di& inPixel) const
+Point3Df SolARRGBDCamera::getPixelToWorld(const Point2Di& inPixel) const
 {
 
         Point3Df outputPoint;
@@ -338,7 +344,7 @@ Point3Df RGBDCamera::getPixelToWorld(const Point2Di& inPixel) const
         return outputPoint;
 }
 
-Point2Di RGBDCamera::getWorldToPixel(const Point3Df& in3DPoint) const
+Point2Di SolARRGBDCamera::getWorldToPixel(const Point3Df& in3DPoint) const
 {
 
         Point2Di pixel;
@@ -360,20 +366,20 @@ Point2Di RGBDCamera::getWorldToPixel(const Point3Df& in3DPoint) const
         return pixel;
 }
 
-std::vector<SRef<Point2Df>> RGBDCamera::getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const
+std::vector<Point2Df> SolARRGBDCamera::getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const
 {
-        std::vector<SRef<Point2Df>> out2DPoints;
+        std::vector<Point2Df> out2DPoints;
 
         for( const auto& pt : in3DPoints )
         {
             auto pti = getWorldToPixel( pt );
-            out2DPoints.push_back( xpcf::utils::make_shared<Point2Df>( pti.x(), pti.y() ) );
+            out2DPoints.push_back( Point2Df( pti.x(), pti.y() ) );
         }
 
         return out2DPoints;
 }
 
-void RGBDCamera::pixelToWorld(const uint16_t* pixels_depth,
+void SolARRGBDCamera::pixelToWorld(const uint16_t* pixels_depth,
         const int w, const int h, const int i,
         const int j, Point3Df& point) const
 {
@@ -403,46 +409,53 @@ void RGBDCamera::pixelToWorld(const uint16_t* pixels_depth,
 }
 
 
-FrameworkReturnCode RGBDCamera::setResolution(Sizei resolution)
+void SolARRGBDCamera::setResolution(const Sizei & resolution)
 {
-        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+	//m_parameters.resolution = resolution;
+	//m_is_resolution_set = true;
 }
 
-FrameworkReturnCode RGBDCamera::setDepthResolution(Sizei resolution)
+FrameworkReturnCode SolARRGBDCamera::setDepthResolution(Sizei resolution)
 {
-        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+     return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-FrameworkReturnCode RGBDCamera::setIntrinsicParameters(const CamCalibration & intrinsic_parameters)
+void SolARRGBDCamera::setIntrinsicParameters(const CamCalibration & intrinsic_parameters)
 {
-        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+    //return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-FrameworkReturnCode RGBDCamera::setIntrinsicDepthParameters(const CamCalibration & intrinsic_parameters)
+FrameworkReturnCode SolARRGBDCamera::setIntrinsicDepthParameters(const CamCalibration & intrinsic_parameters)
 {
-        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+     return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-FrameworkReturnCode RGBDCamera::setDistortionParameters(const CamDistortion & distortion_parameters)
+void SolARRGBDCamera::setDistorsionParameters(const CamDistortion & distortion_parameters)
 {
-        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+	//m_parameters.distorsion = distorsion_parameters;
 }
 
-FrameworkReturnCode RGBDCamera::setDistortionDepthParameters(const CamDistortion & distortion_parameters)
+FrameworkReturnCode SolARRGBDCamera::setDistortionDepthParameters(const CamDistortion & distortion_parameters)
 {
-        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+    return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-Sizei RGBDCamera::getResolution()
-{
-        if (!m_is_opened)
-                return { 0, 0 };
 
-        return { static_cast<uint32_t>(m_color_intrin.width),
-                static_cast<uint32_t>(m_color_intrin.height) };
+void SolARRGBDCamera::setParameters(const CameraParameters & parameters)
+{
+
 }
 
-Sizei RGBDCamera::getDepthResolution()
+Sizei SolARRGBDCamera::getResolution()
+{
+    if (!m_is_opened)
+            return { 0, 0 };
+
+    return { static_cast<uint32_t>(m_color_intrin.width),
+            static_cast<uint32_t>(m_color_intrin.height) };
+}
+
+Sizei SolARRGBDCamera::getDepthResolution()
 {
         if (!m_is_opened)
                 return { 0, 0 };
@@ -451,24 +464,27 @@ Sizei RGBDCamera::getDepthResolution()
                 static_cast<uint32_t>(m_depth_intrin.height) };
 }
 
-const CamCalibration& RGBDCamera::getIntrinsicsParameters() const
-{
-        return m_rgb_camera_information.calibration;
+const CamCalibration & SolARRGBDCamera::getIntrinsicsParameters() {
+	return m_rgb_camera_information.calibration;
 }
 
-const CamCalibration& RGBDCamera::getIntrinsicsDepthParameters() const
-{
-        return m_depth_camera_information.calibration;
+const CameraParameters & SolARRGBDCamera::getParameters() {
+	return m_parameters;
 }
 
-const CamDistortion& RGBDCamera::getDistortionParameters() const
+const CamCalibration& SolARRGBDCamera::getIntrinsicsDepthParameters() const
 {
-        return m_rgb_camera_information.distortion;
+    return m_depth_camera_information.calibration;
 }
 
-const CamDistortion& RGBDCamera::getDistortionDepthParameters() const
+const CamDistortion& SolARRGBDCamera::getDistorsionParameters() 
 {
-        return m_depth_camera_information.distortion;
+	return m_rgb_camera_information.distortion;
+}
+
+const CamDistortion& SolARRGBDCamera::getDistortionDepthParameters() const
+{
+    return m_depth_camera_information.distortion;
 }
 
 }

@@ -22,14 +22,14 @@
 namespace SolAR {
 namespace MODULES {
 namespace REALSENSE {
-class RGBDCamera;
+class SolARRGBDCamera;
 }
 }
 }
 
-XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::REALSENSE::RGBDCamera,
+XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::REALSENSE::SolARRGBDCamera,
                              "315dfef4-26f3-4a79-a809-874b1006cd88",
-                             "RGBDCamera",
+                             "SolARRGBDCamera",
                              "A component to handle a Real Sense RGBD Camera")
 
 #endif // SOLARMODULEREALSENSE_TRAITS_H
