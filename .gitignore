@@ -81,6 +81,7 @@ x64/
 *remakeninfo.txt
 Debug/
 Release/
+bcom-SolARModuleRealSense.pc
 *-packagedependencies.*
 *-packagedependencies-win.*
 *.rc

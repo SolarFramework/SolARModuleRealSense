@@ -117,12 +117,12 @@ public:
 	FrameworkReturnCode setIntrinsicDepthParameters(const CamCalibration & intrinsic_parameters) override ;
 
     /// @brief Set the distortion intrinsic parameters of the RGB camera
-	void setDistorsionParameters(const CamDistortion & distorsion_parameters) override ;
+	void setDistortionParameters(const CamDistortion & distortion_parameters) override ;
 
     /// @brief Set the distortion intrinsic parameters of the depth camera
 	FrameworkReturnCode setDistortionDepthParameters(const CamDistortion & distortion_parameters) override ;
 
-	/// @brief Set the distorsion intrinsic camera parameters
+	/// @brief Set the distortion intrinsic camera parameters
 	void setParameters(const CameraParameters & parameters) override;
 
     /// @brief Get the image resolution of the RGB acquisition device
@@ -141,7 +141,7 @@ public:
     const CamCalibration& getIntrinsicsDepthParameters() const override ;
 
     /// @return Return the distortion RGB camera lens parameters
-	const CamDistortion & getDistorsionParameters() override ;
+	const CamDistortion & getDistortionParameters() override ;
 
     /// @return Return the distortion depth camera lens parameters
     const CamDistortion& getDistortionDepthParameters() const override ;

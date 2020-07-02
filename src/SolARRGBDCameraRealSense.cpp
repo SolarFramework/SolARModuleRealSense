@@ -430,7 +430,7 @@ FrameworkReturnCode SolARRGBDCamera::setIntrinsicDepthParameters(const CamCalibr
      return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-void SolARRGBDCamera::setDistorsionParameters(const CamDistortion & distortion_parameters)
+void SolARRGBDCamera::setDistortionParameters(const CamDistortion & distortion_parameters)
 {
 	//m_parameters.distorsion = distorsion_parameters;
 }
@@ -477,7 +477,7 @@ const CamCalibration& SolARRGBDCamera::getIntrinsicsDepthParameters() const
     return m_depth_camera_information.calibration;
 }
 
-const CamDistortion& SolARRGBDCamera::getDistorsionParameters() 
+const CamDistortion& SolARRGBDCamera::getDistortionParameters() 
 {
 	return m_rgb_camera_information.distortion;
 }
