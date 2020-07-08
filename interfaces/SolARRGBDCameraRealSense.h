@@ -79,10 +79,6 @@ public:
 	/// @return FrameworkReturnCode::_SUCCESS if sucessful, eiher FrameworkRetunrnCode::_ERROR_.
 	FrameworkReturnCode stop() override;
 
-    /// @brief Start the acquisition device reference
-    /// @return FrameworkReturnCode to track sucessful or failing event.
-    FrameworkReturnCode startRGBD() override ;
-
     /// @brief Provides a depth image alingned on the color image
     /// @param alignedDepthImg the depth image captured by the RGBD camera and aligned on the color image
     virtual FrameworkReturnCode alignDepthToColor (SRef<Image>& alignedDepthImg) const override;
@@ -113,7 +109,8 @@ public:
 
     /// @brief Set the intrinsic RGB camera parameters
 	void setIntrinsicParameters(const CamCalibration & intrinsic_parameters) override;
-    /// @brief Set the intrinsic parameters of the depth camera
+   
+	/// @brief Set the intrinsic parameters of the depth camera
 	FrameworkReturnCode setIntrinsicDepthParameters(const CamCalibration & intrinsic_parameters) override ;
 
     /// @brief Set the distortion intrinsic parameters of the RGB camera

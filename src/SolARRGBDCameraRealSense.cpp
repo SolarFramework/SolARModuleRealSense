@@ -33,7 +33,6 @@ SolARRGBDCamera::SolARRGBDCamera():ConfigurableBase(xpcf::toUUID<SolARRGBDCamera
 {
 		declareInterface<api::input::devices::IRGBDCamera>(this);
 		LOG_DEBUG("SolARRGBDCamera constructor");
-
 		declareProperty("rgb_width", m_rgb_camera_information.size.width);
 		declareProperty("rgb_height", m_rgb_camera_information.size.height);
 		declareProperty("rgb_framerate", m_rgb_camera_information.framerate);
@@ -193,18 +192,7 @@ SRef<Image> SolARRGBDCamera::depthFrameToImage(const rs2::frame& frame)
                 Image::DataType::TYPE_16U);
 }
 
-
 FrameworkReturnCode SolARRGBDCamera::start()
-{
-    return FrameworkReturnCode::_NOT_IMPLEMENTED;
-}
-
-FrameworkReturnCode SolARRGBDCamera::stop()
-{
-	return FrameworkReturnCode::_NOT_IMPLEMENTED;
-}
-
-FrameworkReturnCode SolARRGBDCamera::startRGBD()
 {
     try
     {
@@ -284,6 +272,11 @@ FrameworkReturnCode SolARRGBDCamera::startRGBD()
     }
 
         return FrameworkReturnCode::_SUCCESS;
+}
+
+FrameworkReturnCode SolARRGBDCamera::stop()
+{
+	return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
 FrameworkReturnCode SolARRGBDCamera::alignDepthToColor(SRef<Image>& alignedDepthImg) const
