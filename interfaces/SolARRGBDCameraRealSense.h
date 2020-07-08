@@ -201,14 +201,6 @@ private:
 	/// Current depth scale
 	float m_depth_scale = 1.f;
 
-	// Default values
-
-	/// Default value for color stream
-	Sizei requested_rgb_size{ 1280, 720 };
-	/// Default value for depth stream
-	Sizei requested_depth_size{ 640, 480 };
-
-
 	// Flags
 
 	/// True if at least a stream is opened
@@ -245,7 +237,9 @@ private:
 	{
 		CamCalibration calibration = CamCalibration::Identity();
 		CamDistortion distortion = CamDistortion::Zero();
-
+		/// Default value for stream
+		Sizei size=Sizei();
+		int framerate = 30;
 		/// Extract realsense intrinsics to fill this structure (calibration and distortion)
 		void extractRSIntrinsics(const rs2_intrinsics& intrinsics);
 	};
@@ -253,7 +247,6 @@ private:
 	CameraInformation m_rgb_camera_information;
 	/// Depth camera information (distortion + calibration)
 	CameraInformation m_depth_camera_information;
-
 };
 
 }

@@ -32,7 +32,14 @@ namespace REALSENSE {
 SolARRGBDCamera::SolARRGBDCamera():ConfigurableBase(xpcf::toUUID<SolARRGBDCamera>())
 {
 		declareInterface<api::input::devices::IRGBDCamera>(this);
-		LOG_DEBUG(" SolARRGBDCamera constructor");
+		LOG_DEBUG("SolARRGBDCamera constructor");
+
+		declareProperty("rgb_width", m_rgb_camera_information.size.width);
+		declareProperty("rgb_height", m_rgb_camera_information.size.height);
+		declareProperty("rgb_framerate", m_rgb_camera_information.framerate);
+		declareProperty("depth_width", m_depth_camera_information.size.width);
+		declareProperty("depth_height", m_depth_camera_information.size.height);
+		declareProperty("depth_framerate", m_depth_camera_information.framerate);
 }
 
 org::bcom::xpcf::XPCFErrorCode SolARRGBDCamera::onConfigured()
@@ -217,28 +224,17 @@ FrameworkReturnCode SolARRGBDCamera::startRGBD()
             const std::string device_name = list.front().get_info(RS2_CAMERA_INFO_NAME);
 
             LOG_INFO("Opening the camera device : {} ", device_name);
-
-            const auto rgbWidth = requested_rgb_size.width;
-            const auto rgbHeight = requested_rgb_size.height;
-            LOG_INFO("-> Enabling rgb stream resolution {}x{}", rgbWidth, rgbHeight);
-            config.enable_stream(RS2_STREAM_COLOR, rgbWidth, rgbHeight, RS2_FORMAT_BGR8, 30);
-
-            const auto depthWidth = requested_depth_size.width;
-            const auto depthHeight = requested_depth_size.height;
-            LOG_INFO("-> Enabling depth stream resolution {}x{}", depthWidth, depthHeight);
-            config.enable_stream(RS2_STREAM_DEPTH, depthWidth, depthHeight, RS2_FORMAT_Z16, 30);
-			LOG_INFO("check 1");
+            LOG_INFO("-> Enabling rgb stream resolution {}x{} - {} fps", m_rgb_camera_information.size.width, m_rgb_camera_information.size.height, m_rgb_camera_information.framerate);
+            config.enable_stream(RS2_STREAM_COLOR, m_rgb_camera_information.size.width, m_rgb_camera_information.size.height, RS2_FORMAT_BGR8, m_rgb_camera_information.framerate);
+            LOG_INFO("-> Enabling depth stream resolution {}x{} - {} fps", m_depth_camera_information.size.width, m_depth_camera_information.size.height, m_depth_camera_information.framerate);
+            config.enable_stream(RS2_STREAM_DEPTH, m_depth_camera_information.size.width, m_depth_camera_information.size.height, RS2_FORMAT_Z16, m_depth_camera_information.framerate);
             // Set camera stream as opened
             m_is_opened = true;
-			LOG_INFO("check 2");
             // Start the pipeline on the first detected device
             pipeline_profile = m_pipe.start(config);
-			LOG_INFO("check 3");
             // Remember depth scale as it is used later
             auto depth_sensor = pipeline_profile.get_device().first<rs2::depth_sensor>();
-			LOG_INFO("check 4");
             m_depth_scale = depth_sensor.get_depth_scale();
-			LOG_INFO("check 5");
         }
         else
         {
@@ -437,13 +433,14 @@ void SolARRGBDCamera::setDistortionParameters(const CamDistortion & distortion_p
 
 FrameworkReturnCode SolARRGBDCamera::setDistortionDepthParameters(const CamDistortion & distortion_parameters)
 {
-    return FrameworkReturnCode::_NOT_IMPLEMENTED;
+	m_depth_camera_information.distortion = distortion_parameters;
+    return FrameworkReturnCode::_SUCCESS;
 }
 
 
 void SolARRGBDCamera::setParameters(const CameraParameters & parameters)
 {
-
+	m_parameters = parameters;
 }
 
 Sizei SolARRGBDCamera::getResolution()
