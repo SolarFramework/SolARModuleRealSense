@@ -355,7 +355,7 @@ Point3Df SolARRGBDCamera::getPixelToWorld(const Point2Di& inPixel) const
         return outputPoint;
 }
 
-Point2Di SolARRGBDCamera::getWorldToPixel(const Point3Df& in3DPoint) const
+Point2Di SolARRGBDCamera::getWorldToPixel(const CloudPoint& in3DPoint) const
 {
         Point2Di pixel;
         if (m_color_intrin.width == 0 || m_color_intrin.height == 0) // intrinsics not initialized
@@ -376,7 +376,7 @@ Point2Di SolARRGBDCamera::getWorldToPixel(const Point3Df& in3DPoint) const
         return pixel;
 }
 
-std::vector<Point2Df> SolARRGBDCamera::getWorldToPixels (const std::vector<Point3Df>& in3DPoints) const
+std::vector<Point2Df> SolARRGBDCamera::getWorldToPixels (const std::vector<CloudPoint>& in3DPoints) const
 {
         std::vector<Point2Df> out2DPoints;
 
