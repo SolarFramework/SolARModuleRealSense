@@ -236,7 +236,7 @@ private:
 	float m_depth_minimum_distance=0.105;
 
 	/// call rs2::colorize
-	int m_depth_colorize = false;
+	int m_depth_colorize = -1;
 
 	/// Contains the calibration and distortion of a stream (rbg or depth)
 	struct CameraInformation
