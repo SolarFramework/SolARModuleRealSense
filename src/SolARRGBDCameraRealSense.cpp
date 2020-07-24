@@ -32,13 +32,15 @@ namespace REALSENSE {
 SolARRGBDCamera::SolARRGBDCamera():ConfigurableBase(xpcf::toUUID<SolARRGBDCamera>())
 {
 		declareInterface<api::input::devices::IRGBDCamera>(this);
-		LOG_DEBUG("SolARRGBDCamera constructor");
 		declareProperty("rgb_width", m_rgb_camera_information.size.width);
 		declareProperty("rgb_height", m_rgb_camera_information.size.height);
 		declareProperty("rgb_framerate", m_rgb_camera_information.framerate);
 		declareProperty("depth_width", m_depth_camera_information.size.width);
 		declareProperty("depth_height", m_depth_camera_information.size.height);
 		declareProperty("depth_framerate", m_depth_camera_information.framerate);
+		declareProperty("depth_colorize", m_depth_colorize);
+		declareProperty("depth_minimum", m_depth_minimum_distance);
+		LOG_DEBUG("SolARRGBDCamera constructor");
 }
 
 org::bcom::xpcf::XPCFErrorCode SolARRGBDCamera::onConfigured()
@@ -49,14 +51,12 @@ org::bcom::xpcf::XPCFErrorCode SolARRGBDCamera::onConfigured()
 
 FrameworkReturnCode SolARRGBDCamera::getNextImage(SRef<Image>& colorImg)
 {
-        colorImg = nullptr;
-        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+	return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
 FrameworkReturnCode SolARRGBDCamera::getNextDepthFrame(SRef<Image>& depthImg)
 {
-        depthImg = nullptr;
-        return FrameworkReturnCode::_NOT_IMPLEMENTED;
+	return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
 FrameworkReturnCode SolARRGBDCamera::getNextRGBDFrame(SRef<Image>& colorImg,
@@ -128,14 +128,14 @@ bool SolARRGBDCamera::fillDepthImage(SRef<Image>& depthImg) {
         if (!m_last_depth_frame)
                 return false;
 
-        depthImg = depthFrameToImage(m_last_depth_frame);
+        depthImg = depthFrameToImage(m_last_depth_frame,m_depth_colorize);
 
         return true;
 }
 
 void SolARRGBDCamera::CameraInformation::extractRSIntrinsics(const rs2_intrinsics& intrinsics)
 {
-        // todo Not sure that fx and fy are the same in realsense or openCV
+        // @TODO Not sure that fx and fy are the same in realsense or openCV
         calibration(0, 0) = intrinsics.fx;
         calibration(1, 1) = intrinsics.fy;
 
@@ -166,7 +166,6 @@ bool SolARRGBDCamera::updateFrameset()
 
 SRef<Image> SolARRGBDCamera::rgbFrameToImage(const rs2::frame& frame)
 {
-
         auto video_frame = frame.as<rs2::video_frame>();
 
         return xpcf::utils::make_shared<Image>(
@@ -178,29 +177,38 @@ SRef<Image> SolARRGBDCamera::rgbFrameToImage(const rs2::frame& frame)
                 Image::DataType::TYPE_8U);
 }
 
-SRef<Image> SolARRGBDCamera::depthFrameToImage(const rs2::frame& frame)
+SRef<Image> SolARRGBDCamera::depthFrameToImage(const rs2::frame& frame,const int colorize)
 {
-
         auto depth_frame = frame.as<rs2::depth_frame>();
 
-        return xpcf::utils::make_shared<Image>(
-                (void*)depth_frame.get_data(),
-                depth_frame.get_width(),
-                depth_frame.get_height(),
-                Image::ImageLayout::LAYOUT_GREY,
-                Image::PixelOrder::PER_CHANNEL,
-                Image::DataType::TYPE_16U);
+		if (colorize>=0) {
+			//colorize image
+			rs2::colorizer color_map(colorize);
+			auto depth_colorized = color_map.colorize(depth_frame);
+
+			return xpcf::utils::make_shared<Image>(
+				(void*)depth_colorized.get_data(),
+				depth_colorized.get_width(),
+				depth_colorized.get_height(),
+				Image::ImageLayout::LAYOUT_RGB,
+				Image::PixelOrder::PER_CHANNEL,
+				Image::DataType::TYPE_8U);
+		}
+		else {
+			return xpcf::utils::make_shared<Image>(
+				(void*)depth_frame.get_data(),
+				depth_frame.get_width(),
+				depth_frame.get_height(),
+				Image::ImageLayout::LAYOUT_GREY,
+				Image::PixelOrder::PER_CHANNEL,
+				Image::DataType::TYPE_16U);
+		}
 }
 
 FrameworkReturnCode SolARRGBDCamera::start()
 {
     try
     {
-        // todo See if we get error code for already opened ?
-        if (m_is_opened)
-                return FrameworkReturnCode::_SUCCESS;
-
-
         rs2::config config;
         rs2::pipeline_profile pipeline_profile;
 
@@ -275,8 +283,23 @@ FrameworkReturnCode SolARRGBDCamera::start()
 }
 
 FrameworkReturnCode SolARRGBDCamera::stop()
-{
-	return FrameworkReturnCode::_NOT_IMPLEMENTED;
+{	
+	try {
+		m_pipe.stop();
+		m_is_opened = false;
+	}
+	catch (const rs2::error & e){
+		LOG_ERROR("RealSense::stop - error calling {} ({}) : {}",
+		e.get_failed_function(), e.get_failed_args(), e.what());
+		// Don't forget to put the is opened flag to false in case of errors
+		m_is_opened = false;
+		return FrameworkReturnCode::_ERROR_;
+	}
+	catch (...)
+	{
+		LOG_ERROR("error : unknown error");
+		return FrameworkReturnCode::_ERROR_;
+	}
 }
 
 FrameworkReturnCode SolARRGBDCamera::alignDepthToColor(SRef<Image>& alignedDepthImg) const
@@ -312,7 +335,6 @@ FrameworkReturnCode SolARRGBDCamera::alignColorToDepth(SRef<Image>& alignedColor
 
 Point3Df SolARRGBDCamera::getPixelToWorld(const Point2Di& inPixel) const
 {
-
         Point3Df outputPoint;
 
         if (m_frameset.size() == 0)
@@ -335,7 +357,6 @@ Point3Df SolARRGBDCamera::getPixelToWorld(const Point2Di& inPixel) const
 
 Point2Di SolARRGBDCamera::getWorldToPixel(const Point3Df& in3DPoint) const
 {
-
         Point2Di pixel;
         if (m_color_intrin.width == 0 || m_color_intrin.height == 0) // intrinsics not initialized
                 return pixel;
@@ -400,18 +421,18 @@ void SolARRGBDCamera::pixelToWorld(const uint16_t* pixels_depth,
 
 void SolARRGBDCamera::setResolution(const Sizei & resolution)
 {
-	//m_parameters.resolution = resolution;
-	//m_is_resolution_set = true;
+	m_rgb_camera_information.size = resolution;
 }
 
 FrameworkReturnCode SolARRGBDCamera::setDepthResolution(Sizei resolution)
 {
-     return FrameworkReturnCode::_NOT_IMPLEMENTED;
+	m_depth_camera_information.size = resolution;
+	return FrameworkReturnCode::_SUCCESS;
 }
 
 void SolARRGBDCamera::setIntrinsicParameters(const CamCalibration & intrinsic_parameters)
 {
-    //return FrameworkReturnCode::_NOT_IMPLEMENTED;
+
 }
 
 FrameworkReturnCode SolARRGBDCamera::setIntrinsicDepthParameters(const CamCalibration & intrinsic_parameters)
@@ -421,7 +442,7 @@ FrameworkReturnCode SolARRGBDCamera::setIntrinsicDepthParameters(const CamCalibr
 
 void SolARRGBDCamera::setDistortionParameters(const CamDistortion & distortion_parameters)
 {
-	//m_parameters.distorsion = distorsion_parameters;
+	m_parameters.distortion = distortion_parameters;
 }
 
 FrameworkReturnCode SolARRGBDCamera::setDistortionDepthParameters(const CamDistortion & distortion_parameters)
@@ -452,6 +473,11 @@ Sizei SolARRGBDCamera::getDepthResolution()
 
         return { static_cast<uint32_t>(m_depth_intrin.width),
                 static_cast<uint32_t>(m_depth_intrin.height) };
+}
+
+float SolARRGBDCamera::getDepthMinDistance()
+{
+	return m_depth_minimum_distance;
 }
 
 const CamCalibration & SolARRGBDCamera::getIntrinsicsParameters() {

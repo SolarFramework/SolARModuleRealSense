@@ -24,22 +24,23 @@
 #include "xpcf/xpcf.h"
 #include "core/Log.h"
 
- // ADD MODULES TRAITS HEADERS HERE
+// ADD MODULES TRAITS HEADERS HERE
 #include "SolARModuleOpencv_traits.h"
 #include "SolARModuleRealSense_traits.h"
 
 // ADD COMPONENTS HEADERS HERE
 #include "api/input/devices/IRGBDCamera.h"
-#include "api/image/IImageConvertor.h"
 #include "api/display/IImageViewer.h"
 
-#define DEPTH_SCALE 4.f * 255.0f/65535.0f
+//#include "opencv2/highgui/highgui.hpp"
+//#include "opencv2/imgproc/imgproc.hpp"
+//using namespace cv;
 
 using namespace SolAR;
 using namespace SolAR::datastructure;
 using namespace SolAR::api;
-using namespace SolAR::MODULES::OPENCV;
 using namespace SolAR::MODULES::REALSENSE;
+using namespace SolAR::MODULES::OPENCV;
 
 namespace xpcf  = org::bcom::xpcf;
 
@@ -49,7 +50,6 @@ int main(int argc, char *argv[])
 #if NDEBUG
     boost::log::core::get()->set_logging_enabled(false);
 #endif
-
     LOG_ADD_LOG_TO_CONSOLE();
 
 	try {
@@ -64,12 +64,11 @@ int main(int argc, char *argv[])
 		// declare and create components
 		LOG_INFO("Start creating components");
 		auto camera = xpcfComponentManager->resolve<input::devices::IRGBDCamera>();
-		auto imageConvertor = xpcfComponentManager->resolve<image::IImageConvertor>();
 		auto viewerRGB = xpcfComponentManager->create<SolARImageViewerOpencv>("color")->bindTo<display::IImageViewer>();
 		auto viewerDepth = xpcfComponentManager->create<SolARImageViewerOpencv>("depth")->bindTo<display::IImageViewer>();
 		LOG_INFO("Components created");
 
-		if (!camera || !imageConvertor || !viewerRGB || !viewerDepth) {
+		if (!camera || !viewerRGB || !viewerDepth) {
 			LOG_ERROR("One or more component creations have failed");
 			return -1;
 		}
@@ -77,7 +76,6 @@ int main(int argc, char *argv[])
 		//declaration
 		SRef<Image>				imageRGB;
 		SRef<Image>				imageDepth;
-		SRef<Image>				imageConvertedDepth = xpcf::utils::make_shared<Image>(Image::LAYOUT_GREY, Image::PER_CHANNEL, Image::DataType::TYPE_8U);
 		char lastKey = ' ';
 
 		// start depth camera
@@ -88,11 +86,9 @@ int main(int argc, char *argv[])
 
 		while (true) {
 			camera->getNextRGBDFrame(imageRGB, imageDepth);
-			imageConvertor->convert(imageDepth, imageConvertedDepth, Image::LAYOUT_GREY, DEPTH_SCALE);
-
-
+		
 			if (viewerRGB->displayKey(imageRGB, lastKey) == FrameworkReturnCode::_STOP ||
-				viewerDepth->displayKey(imageConvertedDepth,lastKey) == FrameworkReturnCode::_STOP)
+				viewerDepth->displayKey(imageDepth,lastKey) == FrameworkReturnCode::_STOP)
 			{
 				LOG_INFO("End of SolARRGBDCamera test");
 				break;

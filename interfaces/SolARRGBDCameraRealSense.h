@@ -63,7 +63,6 @@ public:
     /// @return FrameworkReturnCode to track sucessful or failing event.
     FrameworkReturnCode getNextRGBDFrame(SRef<Image>& colorImg, SRef<Image>& depthImg) override;
 
-
     /// @brief Provides the corresponding 3D point cloud to last depth image aquiered (getNextRGBDFrame())
     /// Should have no effect if the user didn't call getNextRGBDFrame() beforehand
     /// @param pc the 3D point cloud reconstructed from the depth image. Points coordinates are defined according to the RGBD camera coordinate system.
@@ -79,7 +78,7 @@ public:
 	/// @return FrameworkReturnCode::_SUCCESS if sucessful, eiher FrameworkRetunrnCode::_ERROR_.
 	FrameworkReturnCode stop() override;
 
-    /// @brief Provides a depth image alingned on the color image
+    /// @brief Provides a depth image aligned on the color image
     /// @param alignedDepthImg the depth image captured by the RGBD camera and aligned on the color image
     virtual FrameworkReturnCode alignDepthToColor (SRef<Image>& alignedDepthImg) const override;
 
@@ -104,6 +103,7 @@ public:
 
     /// @brief Set the color image resolution of the acquisition device
 	void setResolution(const Sizei & resolution) override;
+
     /// @brief Set the depth image resolution of the acquisition device
 	FrameworkReturnCode setDepthResolution(Sizei resolution) override;
 
@@ -127,6 +127,9 @@ public:
 
     /// @brief Get the image resolution of the depth acquisition device
     Sizei getDepthResolution() override ;
+
+	/// @brief Get the min acquisition distance of the device
+	float getDepthMinDistance() override;
 
     /// @return Return the intrinsic RGB camera parameters
 	const CamCalibration & getIntrinsicsParameters() override ;
@@ -157,9 +160,10 @@ private:
 	/**
 	 * \brief Convert a realsense depth frame to a SolAR image
 	 * \param depth_frame realsense depth frame
+	 * \param colorize set >=0 to use rs2::colorize, color use depends of value
 	 * \return Solar Image corresponding to given frame
 	 */
-	static SRef<Image> depthFrameToImage(const rs2::frame& depth_frame);
+	static SRef<Image> depthFrameToImage(const rs2::frame& depth_frame,const int colorize=-1);
 
 	/**
 	 * \brief Update frameset with lastest images
@@ -229,6 +233,11 @@ private:
 
 	// SolAR
 	CameraParameters m_parameters;
+	float m_depth_minimum_distance=0.105;
+
+	/// call rs2::colorize
+	int m_depth_colorize = false;
+
 	/// Contains the calibration and distortion of a stream (rbg or depth)
 	struct CameraInformation
 	{
