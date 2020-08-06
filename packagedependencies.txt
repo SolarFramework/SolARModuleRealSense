@@ -1,2 +1,2 @@
 SolARFramework|0.8.1|SolARFramework|SolARBuild@github|https://github.com/SolarFramework/SolarFramework/releases/download
-realsense2|2.35.2|realsense2|thirdParties@github|https://github.com/SolarFramework/binaries/releases/download
+realsense2|2.36.0|realsense2|thirdParties@github|https://github.com/SolarFramework/binaries/releases/download
