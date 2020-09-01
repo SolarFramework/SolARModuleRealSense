@@ -3,7 +3,7 @@ QT       -= core gui
 CONFIG -= qt
 
 ## global defintions : target lib name, version
-TARGET = SolARRGBDCameraTest
+TARGET = SolARTestRealSenseRGBDCamera
 VERSION=0.8.1
 
 DEFINES += MYVERSION=$${VERSION}
@@ -43,7 +43,7 @@ DEFINES += BOOST_LOG_DYN_LINK
 SOURCES += \
     main.cpp
 
-unix {
+unix:!android {
     LIBS += -ldl
     QMAKE_CXXFLAGS += -DBOOST_LOG_DYN_LINK
 }
@@ -64,7 +64,7 @@ win32 {
 }
 
 config_files.path = $${TARGETDEPLOYDIR}
-config_files.files= $$files($${PWD}/SolARRGBDCameraTest_conf.xml)
+config_files.files= $$files($${PWD}/SolARTestRealSenseRGBDCamera_conf.xml)
 
 INSTALLS += config_files
 

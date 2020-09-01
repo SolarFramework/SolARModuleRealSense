@@ -1,9 +1,9 @@
-libname=SolARRGBDCameraTest
+libname=SolARTestRealSenseRGBDCamera
 prefix=/usr/local
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/interfaces
-Name: SolARPointCloudLoader
+Name: SolARTestRealSenseRGBDCamera
 Description: 
 Version: 0.8.1
 Requires:
