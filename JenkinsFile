@@ -1,0 +1,5 @@
+SolArModulePipeline {
+    moduleName="SolARModuleRealSense"
+    runTests=true
+    dirName="SolARBuild"
+}
