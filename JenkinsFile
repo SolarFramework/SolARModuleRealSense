@@ -4,4 +4,5 @@ SolArModulePipeline {
     makeTarget="install_deps"
     runTests=true
     android=false
+    linux=false
 }
