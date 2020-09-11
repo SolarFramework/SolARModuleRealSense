@@ -7,7 +7,7 @@ It offers a C++ SDK to easily and quickly develop and use custom solutions for c
 
 The **SolAR Module RealSense** is a module to use [ Intel® RealSense™](https://www.intelrealsense.com/) depth sensors throught his [RealSense SDK](https://www.intelrealsense.com/sdk-2/). Intel® RealSense™ technologies offer a variety of vision‑based solutions designed to understand the world in 3D.
 
-**/!\ Only available on Windows, thirdparties for Linux will be soon deployed**
+**/!\ Only available on Windows, thirdparties for Linux will be soon deployed. Otherwise you can already check [RealSense linux distribution](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)**
 ## Tests
 ### SolARTestRealSenseRGBDCamera
 To test IRGBD interface
