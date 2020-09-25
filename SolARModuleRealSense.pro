@@ -24,7 +24,7 @@ CONFIG(release,debug|release) {
     DEFINES += NDEBUG=1
 }
 
-DEPENDENCIESCONFIG = sharedlib recursive install
+DEPENDENCIESCONFIG = shared install_recurse
 
 ## Configuration for Visual Studio to install binaries and dependencies. Work also for QT Creator by replacing QMAKE_INSTALL
 PROJECTCONFIG = QTVS
@@ -43,8 +43,8 @@ include (SolARModuleRealSense.pri)
 
 unix:!android {
     QMAKE_CXXFLAGS += -Wignored-qualifiers
-    QMAKE_LINK=clang++
-    QMAKE_CXX = clang++
+#    QMAKE_LINK=clang++
+#    QMAKE_CXX = clang++
 }
 
 macx {
@@ -63,6 +63,10 @@ win32 {
     QMAKE_CXXFLAGS += -wd4250 -wd4251 -wd4244 -wd4275 /Od
 }
 
+android {
+    ANDROID_ABIS="arm64-v8a"
+}
+
 header_files.path = $${PROJECTDEPLOYDIR}/interfaces
 header_files.files = $$files($${PWD}/interfaces/*.h*)
 
@@ -73,7 +77,11 @@ INSTALLS += header_files
 INSTALLS += xpcf_xml_files
 
 OTHER_FILES += \
-    packagedependencies.txt
+    packagedependencies.txt \
+    packagedependencies-linux.txt \
+    packagedependencies-mac.txt \
+    packagedependencies-win.txt \
+    packagedependencies-android.txt
 
 #NOTE : Must be placed at the end of the .pro
 include ($$shell_quote($$shell_path($${QMAKE_REMAKEN_RULES_ROOT}/remaken_install_target.pri)))) # Shell_quote & shell_path required for visual on windows
