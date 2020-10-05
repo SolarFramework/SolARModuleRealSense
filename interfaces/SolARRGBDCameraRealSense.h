@@ -30,7 +30,7 @@ namespace MODULES {
 namespace REALSENSE {
 
 /**
- * @class RGBDCamera
+ * @class SolARRGBDCamera
  * @brief This component handles a real sense RGBD camera and provides access to the color image, the depth image, and the 3D point cloud.
  */
 class SOLARREALSENSE_EXPORT_API SolARRGBDCamera : public org::bcom::xpcf::ConfigurableBase,
