@@ -233,7 +233,7 @@ private:
 
 	// SolAR
 	CameraParameters m_parameters;
-	float m_depth_minimum_distance=0.105;
+    float m_depth_minimum_distance=0.105f;
 
 	/// call rs2::colorize
 	int m_depth_colorize = -1;
