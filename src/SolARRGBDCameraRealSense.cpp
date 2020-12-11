@@ -45,7 +45,7 @@ SolARRGBDCamera::SolARRGBDCamera():ConfigurableBase(xpcf::toUUID<SolARRGBDCamera
 
 org::bcom::xpcf::XPCFErrorCode SolARRGBDCamera::onConfigured()
 {
-        return xpcf::_SUCCESS;
+        return xpcf::XPCFErrorCode::_SUCCESS;
 }
 
 
