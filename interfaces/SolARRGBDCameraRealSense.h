@@ -122,25 +122,25 @@ public:
 	void setParameters(const datastructure::CameraParameters & parameters) override;
 
     /// @brief Get the image resolution of the RGB acquisition device
-	datastructure::Sizei getResolution() override ;
+    datastructure::Sizei getResolution() const override ;
 
     /// @brief Get the image resolution of the depth acquisition device
-	datastructure::Sizei getDepthResolution() override ;
+    datastructure::Sizei getDepthResolution() const override ;
 
 	/// @brief Get the min acquisition distance of the device
-	float getDepthMinDistance() override;
+    float getDepthMinDistance() const override;
 
     /// @return Return the intrinsic RGB camera parameters
-	const datastructure::CamCalibration & getIntrinsicsParameters() override ;
+    const datastructure::CamCalibration & getIntrinsicsParameters() const override ;
 
 	/// @return Return the camera parameters
-	const datastructure::CameraParameters & getParameters() override;
+    const datastructure::CameraParameters & getParameters() const override;
 
     /// @return Return the intrinsic depth camera parameters
     const datastructure::CamCalibration& getIntrinsicsDepthParameters() const override ;
 
     /// @return Return the distortion RGB camera lens parameters
-	const datastructure::CamDistortion & getDistortionParameters() override ;
+    const datastructure::CamDistortion & getDistortionParameters() const override ;
 
     /// @return Return the distortion depth camera lens parameters
     const datastructure::CamDistortion& getDistortionDepthParameters() const override ;

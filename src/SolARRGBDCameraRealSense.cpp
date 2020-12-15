@@ -457,7 +457,7 @@ void SolARRGBDCamera::setParameters(const CameraParameters & parameters)
 	m_parameters = parameters;
 }
 
-Sizei SolARRGBDCamera::getResolution()
+Sizei SolARRGBDCamera::getResolution() const
 {
     if (!m_is_opened)
             return { 0, 0 };
@@ -466,7 +466,7 @@ Sizei SolARRGBDCamera::getResolution()
             static_cast<uint32_t>(m_color_intrin.height) };
 }
 
-Sizei SolARRGBDCamera::getDepthResolution()
+Sizei SolARRGBDCamera::getDepthResolution() const
 {
         if (!m_is_opened)
                 return { 0, 0 };
@@ -475,16 +475,16 @@ Sizei SolARRGBDCamera::getDepthResolution()
                 static_cast<uint32_t>(m_depth_intrin.height) };
 }
 
-float SolARRGBDCamera::getDepthMinDistance()
+float SolARRGBDCamera::getDepthMinDistance() const
 {
 	return m_depth_minimum_distance;
 }
 
-const CamCalibration & SolARRGBDCamera::getIntrinsicsParameters() {
+const CamCalibration & SolARRGBDCamera::getIntrinsicsParameters() const {
 	return m_rgb_camera_information.calibration;
 }
 
-const CameraParameters & SolARRGBDCamera::getParameters() {
+const CameraParameters & SolARRGBDCamera::getParameters() const {
 	return m_parameters;
 }
 
@@ -493,7 +493,7 @@ const CamCalibration& SolARRGBDCamera::getIntrinsicsDepthParameters() const
     return m_depth_camera_information.calibration;
 }
 
-const CamDistortion& SolARRGBDCamera::getDistortionParameters() 
+const CamDistortion& SolARRGBDCamera::getDistortionParameters() const
 {
 	return m_rgb_camera_information.distortion;
 }
