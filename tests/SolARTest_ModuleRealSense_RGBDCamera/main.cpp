@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
 	try {
 		SRef<xpcf::IComponentManager> xpcfComponentManager = xpcf::getComponentManagerInstance();
 
-		if (xpcfComponentManager->load("SolARTestRealSenseRGBDCamera_conf.xml") != org::bcom::xpcf::_SUCCESS)
+        if (xpcfComponentManager->load("SolARTest_ModuleRealSense_RGBDCamera_conf.xml") != org::bcom::xpcf::_SUCCESS)
 		{
-			LOG_ERROR("Failed to load the configuration file SolARTestRealSenseRGBDCamera_conf.xml")
+            LOG_ERROR("Failed to load the configuration file SolARTest_ModuleRealSense_RGBDCamera_conf.xml")
 				return -1;
 		}
 
