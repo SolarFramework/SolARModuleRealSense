@@ -17,6 +17,7 @@
 #include "SolARRGBDCameraRealSense.h"
 #include "datastructure/Image.h"
 #include <librealsense2/rsutil.h>
+#include "xpcf/core/helpers.h"
 #include "core/Log.h"
 
 namespace xpcf = org::bcom::xpcf;
@@ -49,18 +50,18 @@ org::bcom::xpcf::XPCFErrorCode SolARRGBDCamera::onConfigured()
 }
 
 
-FrameworkReturnCode SolARRGBDCamera::getNextImage([[maybe_unused]] SRef<Image>& colorImg)
+FrameworkReturnCode SolARRGBDCamera::getNextImage(ATTRIBUTE(maybe_unused) SRef<Image>& colorImg)
 {
 	return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-FrameworkReturnCode SolARRGBDCamera::getNextDepthFrame([[maybe_unused]] SRef<Image>& depthImg)
+FrameworkReturnCode SolARRGBDCamera::getNextDepthFrame(ATTRIBUTE(maybe_unused) SRef<Image>& depthImg)
 {
 	return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
 
-FrameworkReturnCode SolARRGBDCamera::getNextRGBDFrame([[maybe_unused]] SRef<Image>& colorImg,
-        [[maybe_unused]] SRef<Image>& depthImg)
+FrameworkReturnCode SolARRGBDCamera::getNextRGBDFrame(ATTRIBUTE(maybe_unused) SRef<Image>& colorImg,
+        ATTRIBUTE(maybe_unused) SRef<Image>& depthImg)
 {
         if (!updateFrameset())
                 return FrameworkReturnCode::_ERROR_;
@@ -430,12 +431,12 @@ FrameworkReturnCode SolARRGBDCamera::setDepthResolution(Sizei resolution)
 	return FrameworkReturnCode::_SUCCESS;
 }
 
-void SolARRGBDCamera::setIntrinsicParameters([[maybe_unused]] const CamCalibration & intrinsic_parameters)
+void SolARRGBDCamera::setIntrinsicParameters(ATTRIBUTE(maybe_unused) const CamCalibration & intrinsic_parameters)
 {
 
 }
 
-FrameworkReturnCode SolARRGBDCamera::setIntrinsicDepthParameters([[maybe_unused]] const CamCalibration & intrinsic_parameters)
+FrameworkReturnCode SolARRGBDCamera::setIntrinsicDepthParameters(ATTRIBUTE(maybe_unused) const CamCalibration & intrinsic_parameters)
 {
      return FrameworkReturnCode::_NOT_IMPLEMENTED;
 }
