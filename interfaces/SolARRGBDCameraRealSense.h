@@ -31,7 +31,36 @@ namespace REALSENSE {
 /**
  * @class SolARRGBDCamera
  * @brief This component handles a real sense RGBD camera and provides access to the color image, the depth image, and the 3D point cloud.
+ *
+ * @SolARComponentPropertiesBegin
+ * @SolARComponentProperty{ rgb_width,
+ *                          ,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 0 }}
+ * @SolARComponentProperty{ rgb_height,
+ *                          ,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 0 }}
+ * @SolARComponentProperty{ rgb_framerate,
+ *                          ,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 30 }}
+ * @SolARComponentProperty{ depth_width,
+ *                          ,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 0 }}
+ * @SolARComponentProperty{ depth_height,
+ *                          ,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 0 }}
+ * @SolARComponentProperty{ depth_framerate,
+ *                          ,
+ *                          @SolARComponentPropertyDescNum{ int, [0..MAX INT], 30 }}
+ * @SolARComponentProperty{ depth_colorize,
+ *                          call rs2::colorizer if >= 0,
+ *                          @SolARComponentPropertyDescNum{ int, [MIN INT..MAX INT], -1 }}
+ * @SolARComponentProperty{ depth_minimum,
+ *                          ,
+ *                          @SolARComponentPropertyDescNum{ float, [0..MAX FLOAT], 0.105f }}
+ * @SolARComponentPropertiesEnd
+ *
  */
+
 class SOLARREALSENSE_EXPORT_API SolARRGBDCamera : public org::bcom::xpcf::ConfigurableBase,
     public api::input::devices::IRGBDCamera
 {
