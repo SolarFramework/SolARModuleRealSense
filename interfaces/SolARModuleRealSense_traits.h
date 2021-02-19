@@ -21,6 +21,12 @@
 
 namespace SolAR {
 namespace MODULES {
+/**
+ * @namespace SolAR::MODULES::REALSENSE
+ * @brief <B>Provides a component to access realsense RGB-D camera : https://www.intelrealsense.com/ </B>
+ * <TT>UUID: 63b92983-f790-448b-8124-3b686d481aaf</TT>
+ *
+ */
 namespace REALSENSE {
 class SolARRGBDCamera;
 }
