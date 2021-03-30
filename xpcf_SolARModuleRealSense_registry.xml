@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <xpcf-registry autoAlias="true"> 
-	<module uuid="63b92983-f790-448b-8124-3b686d481aaf" name="SolARModuleRealSense" description="RealSense modules" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleRealSense/0.9.1/lib/x86_64/shared">
+	<module uuid="63b92983-f790-448b-8124-3b686d481aaf" name="SolARModuleRealSense" description="RealSense modules" path="$REMAKEN_PKG_ROOT/packages/SolARBuild/win-cl-14.1/SolARModuleRealSense/0.9.4/lib/x86_64/shared">
 		<component uuid="315dfef4-26f3-4a79-a809-874b1006cd88" name="SolARRGBDCamera" description="A component to handle a Real Sense RGBD Camera">
                 <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
                 <interface uuid="5bf56174-94fd-4256-8eb7-b653ea3b8c34" name="IRGBDCamera" description="Interface for RGBD camera"/>
