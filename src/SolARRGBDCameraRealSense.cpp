@@ -96,16 +96,9 @@ FrameworkReturnCode SolARRGBDCamera::getPointCloud(SRef<PointCloud> &outputPoint
         if (outputPointCloud == nullptr)
             outputPointCloud = xpcf::utils::make_shared<PointCloud>();
 
-        auto& rawPointCloudData = outputPointCloud->getPointCloud();
-
-        rawPointCloudData.resize(points.size());
-
         for (auto i = 0u; i < points.size(); i++)
         {
-            auto& pt = rawPointCloudData.at(i);
-            pt.setX(vertices[i].x);
-            pt.setY(vertices[i].y);
-            pt.setZ(vertices[i].z);
+			outputPointCloud->addPoint(CloudPoint(vertices[i].x, vertices[i].y, vertices[i].z));
         }
 
         return  FrameworkReturnCode::_SUCCESS;
