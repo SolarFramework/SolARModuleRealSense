@@ -48,6 +48,11 @@ unix:!android {
 #    QMAKE_CXX = clang++
 }
 
+linux {
+        QMAKE_LFLAGS += -ldl
+        LIBS += -L/home/linuxbrew/.linuxbrew/lib # temporary fix caused by grpc with -lre2 ... without -L in grpc.pc
+}
+
 macx {
     message("------------ This module is not supported on Mac platform --------------")
     DEFINES += _MACOS_TARGET_
