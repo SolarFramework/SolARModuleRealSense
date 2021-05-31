@@ -42,12 +42,19 @@ INCLUDEPATH += interfaces/
 include (SolARModuleRealSense.pri)
 
 unix:!android {
+    message("------------ This module is not supported on Unix platform --------------")
     QMAKE_CXXFLAGS += -Wignored-qualifiers
 #    QMAKE_LINK=clang++
 #    QMAKE_CXX = clang++
 }
 
+linux {
+        QMAKE_LFLAGS += -ldl
+        LIBS += -L/home/linuxbrew/.linuxbrew/lib # temporary fix caused by grpc with -lre2 ... without -L in grpc.pc
+}
+
 macx {
+    message("------------ This module is not supported on Mac platform --------------")
     DEFINES += _MACOS_TARGET_
     QMAKE_MAC_SDK= macosx
     QMAKE_CFLAGS += -mmacosx-version-min=10.7 -std=c11 #-x objective-c++
