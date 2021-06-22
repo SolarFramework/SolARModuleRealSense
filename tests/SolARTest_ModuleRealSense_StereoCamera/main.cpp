@@ -25,12 +25,8 @@
 #include "core/Log.h"
 
 // ADD COMPONENTS HEADERS HERE
-#include "api/input/devices/IRGBDCamera.h"
+#include "api/input/devices/IARDevice.h"
 #include "api/display/IImageViewer.h"
-
-//#include "opencv2/highgui/highgui.hpp"
-//#include "opencv2/imgproc/imgproc.hpp"
-//using namespace cv;
 
 using namespace SolAR;
 using namespace SolAR::datastructure;
@@ -49,27 +45,28 @@ int main(int argc, char *argv[])
 	try {
 		SRef<xpcf::IComponentManager> xpcfComponentManager = xpcf::getComponentManagerInstance();
 
-        if (xpcfComponentManager->load("SolARTest_ModuleRealSense_RGBDCamera_conf.xml") != org::bcom::xpcf::_SUCCESS)
+        if (xpcfComponentManager->load("SolARTest_ModuleRealSense_StereoCamera_conf.xml") != org::bcom::xpcf::_SUCCESS)
 		{
-            LOG_ERROR("Failed to load the configuration file SolARTest_ModuleRealSense_RGBDCamera_conf.xml")
+            LOG_ERROR("Failed to load the configuration file SolARTest_ModuleRealSense_StereoCamera_conf.xml")
 				return -1;
 		}
 
 		// declare and create components
 		LOG_INFO("Start creating components");
-		auto camera = xpcfComponentManager->resolve<input::devices::IRGBDCamera>();
-		auto viewerRGB = xpcfComponentManager->resolve<display::IImageViewer>("color");
-		auto viewerDepth = xpcfComponentManager->resolve<display::IImageViewer>("depth");
+		auto camera = xpcfComponentManager->resolve<input::devices::IARDevice>();
+		auto viewer1 = xpcfComponentManager->resolve<display::IImageViewer>("camera1");
+		auto viewer2 = xpcfComponentManager->resolve<display::IImageViewer>("camera2");
 		LOG_INFO("Components created");
 
-		if (!camera || !viewerRGB || !viewerDepth) {
+		if (!camera || !viewer1 || !viewer2) {
 			LOG_ERROR("One or more component creations have failed");
 			return -1;
 		}
 
 		//declaration
-		SRef<Image>				imageRGB;
-		SRef<Image>				imageDepth;
+		std::vector<SRef<Image>>				images;
+		std::vector<Transform3Df>				poses;
+		std::chrono::system_clock::time_point	timestamp;
 		char lastKey = ' ';
 
 		// start depth camera
@@ -78,13 +75,20 @@ int main(int argc, char *argv[])
 				return EXIT_FAILURE;
 		}
 
+		// get intrinsic parameters
+		CameraParameters param1 = camera->getParameters(0);
+		CameraParameters param2 = camera->getParameters(1);
+		LOG_INFO("Camera 1 parameters:\nResolution: {} x {}\nIntrinsic:\n{}\nDistortion:\n{}",
+			param1.resolution.width, param1.resolution.height, param1.intrinsic, param1.distortion);
+		LOG_INFO("Camera 2 parameters:\nResolution: {} x {}\nIntrinsic:\n{}\nDistortion:\n{}",
+			param2.resolution.width, param2.resolution.height, param2.intrinsic, param2.distortion);
+
 		while (true) {
-			camera->getNextRGBDFrame(imageRGB, imageDepth);
-		
-			if (viewerRGB->displayKey(imageRGB, lastKey) == FrameworkReturnCode::_STOP ||
-				viewerDepth->displayKey(imageDepth,lastKey) == FrameworkReturnCode::_STOP)
+			camera->getData(images, poses, timestamp);	
+			if (viewer1->displayKey(images[0], lastKey) == FrameworkReturnCode::_STOP ||
+				viewer2->displayKey(images[1],lastKey) == FrameworkReturnCode::_STOP)
 			{
-				LOG_INFO("End of SolARRGBDCamera test");
+				LOG_INFO("End of SolARStereoCamera test");
 				break;
 			}
 		}

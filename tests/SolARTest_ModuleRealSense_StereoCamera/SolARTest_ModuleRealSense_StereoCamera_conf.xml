@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<xpcf-registry autoAlias="true">
+	<module uuid="63b92983-f790-448b-8124-3b686d481aaf" name="SolARModuleRealSense" description="RealSense modules" path="$XPCF_MODULE_ROOT/SolARBuild/SolARModuleRealSense/0.9.3/lib/x86_64/shared">
+		<component uuid="0e9c544f-64af-41d8-96d2-58b5e2f816a0" name="SolARStereoCameraRealsense" description="A component to handle a Real Sense RGBD Camera">
+			<interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
+			<interface uuid="999085e6-1d11-41a5-8cca-3daf4e02e941" name="IARDevice" description="IARDevice"/>
+        </component>
+    </module>
+	<module uuid="15e1990b-86b2-445c-8194-0cbe80ede970" name="SolARModuleOpenCV" description="OpenCV" path="$XPCF_MODULE_ROOT/SolARBuild/SolARModuleOpenCV/0.9.3/lib/x86_64/shared">
+		<component uuid="19ea4e13-7085-4e3f-92ca-93f200ffb01b" name="SolARImageViewerOpencv" description="SolARImageViewerOpencv">
+			<interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
+			<interface uuid="b05f3dbb-f93d-465c-aee1-fb58e1480c42" name="IImageViewer" description="IImageViewer"/>
+        </component>
+    </module>
+	<factory>
+		<bindings>
+			<bind interface="IARDevice" to="SolARStereoCameraRealsense"/>
+			<bind interface="IImageViewer" to="SolARImageViewerOpencv" name="camera1" properties="viewer1"/>
+			<bind interface="IImageViewer" to="SolARImageViewerOpencv" name="camera2" properties="viewer2"/>
+		</bindings>
+  	</factory>
+	<properties>
+		<configure component="SolARStereoCameraRealsense">
+            <property name="width" type="int" value="640"/>
+            <property name="height" type="int" value="480"/>
+            <property name="framerate" type="int" value="30"/>
+		</configure>
+		<configure component="SolARImageViewerOpencv" name="viewer1">
+			<property name="title" type="string" value="Camera 1 (pres esc to quit)"/>
+            <property name="exitKey" type="int" value="27"/>
+            <property name="width" type="int" value="640"/>
+            <property name="height" type="int" value="480"/>
+		</configure>
+		<configure component="SolARImageViewerOpencv" name="viewer2">
+			<property name="title" type="string" value="Camera 2"/>
+            <property name="exitKey" type="int" value="27"/>
+            <property name="width" type="int" value="640"/>
+            <property name="height" type="int" value="480"/>
+		</configure>
+	</properties>
+</xpcf-registry>

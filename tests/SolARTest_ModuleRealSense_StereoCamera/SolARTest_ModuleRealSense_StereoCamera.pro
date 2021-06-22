@@ -3,7 +3,7 @@ QT       -= core gui
 CONFIG -= qt
 
 ## global defintions : target lib name, version
-TARGET = SolARTest_ModuleRealSense_RGBDCamera
+TARGET = SolARTest_ModuleRealSense_StereoCamera
 VERSION=0.9.3
 
 DEFINES += MYVERSION=$${VERSION}
@@ -64,7 +64,7 @@ win32 {
 }
 
 config_files.path = $${TARGETDEPLOYDIR}
-config_files.files= $$files($${PWD}/SolARTest_ModuleRealSense_RGBDCamera_conf.xml)
+config_files.files= $$files($${PWD}/SolARTest_ModuleRealSense_StereoCamera_conf.xml)
 
 INSTALLS += config_files
 

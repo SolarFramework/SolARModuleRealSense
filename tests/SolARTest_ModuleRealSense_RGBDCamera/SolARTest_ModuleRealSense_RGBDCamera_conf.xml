@@ -17,7 +17,8 @@
 	<factory>
       <bindings>
         <bind interface="IRGBDCamera" to="SolARRGBDCamera"/>
-        <bind interface="IImageViewer" to="SolARImageViewerOpencv"/>
+        <bind interface="IImageViewer" to="SolARImageViewerOpencv" name="color" properties="color"/>
+        <bind interface="IImageViewer" to="SolARImageViewerOpencv" name="depth" properties="depth"/>
       </bindings>
   	</factory>
 	<properties>

@@ -29,6 +29,7 @@ namespace MODULES {
  */
 namespace REALSENSE {
 class SolARRGBDCamera;
+class SolARStereoCameraRealsense;
 }
 }
 }
@@ -37,5 +38,10 @@ XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::REALSENSE::SolARRGBDCamera,
                              "315dfef4-26f3-4a79-a809-874b1006cd88",
                              "SolARRGBDCamera",
                              "A component to handle a Real Sense RGBD Camera")
+
+XPCF_DEFINE_COMPONENT_TRAITS(SolAR::MODULES::REALSENSE::SolARStereoCameraRealsense,
+							"0e9c544f-64af-41d8-96d2-58b5e2f816a0",
+							"SolARStereoCameraRealsense",
+							"A component to get data from a stereo camera of Realsense")
 
 #endif // SOLARMODULEREALSENSE_TRAITS_H
