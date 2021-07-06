@@ -83,6 +83,19 @@ int main(int argc, char *argv[])
 		LOG_INFO("Camera 2 parameters:\nResolution: {} x {}\nIntrinsic:\n{}\nDistortion:\n{}",
 			param2.resolution.width, param2.resolution.height, param2.intrinsic, param2.distortion);
 
+		// get rectification parameters
+		std::vector<RectificationParameters> rectParams;
+		LOG_INFO("Rectification parameters:");
+		if (camera->getRectificationParameters(std::make_pair(0, 1), rectParams) == FrameworkReturnCode::_SUCCESS) {
+			LOG_INFO("Baseline: {}", rectParams[0].baseline);
+			LOG_INFO("fb: {}", rectParams[0].fb);
+			LOG_INFO("Type: {}", rectParams[0].type);
+			for (int i = 0; i < 2; ++i)
+				LOG_INFO("Camera {} parameters:\nRotation:\n{}\nProjection:\n{}", i, rectParams[i].rotation, rectParams[i].projection);
+		}
+		else
+			LOG_WARNING("Not existed rectification between camera 0 and 1");
+
 		while (true) {
 			camera->getData(images, poses, timestamp);	
 			if (viewer1->displayKey(images[0], lastKey) == FrameworkReturnCode::_STOP ||

@@ -65,10 +65,12 @@ public:
 	/// @return the camera parameters
 	const datastructure::CameraParameters & getParameters(const int & camera_id) const override;
 
-	/// @brief Set the distortion and intrinsic camera parameters
-	/// @param[in] camera_id: The id of the camera.
-	/// @param[in] parameters: the camera parameters.
-	void setParameters(const int & camera_id, const datastructure::CameraParameters & parameters) override;
+    /// @brief Get the rectification parameters of a stereo camera
+    /// @param[in] pairCameraIds The pair ids of the stereo camera.
+    /// @param[out] rectParams The vector of rectification parameters of the stereo camera
+    /// @return FrameworkReturnCode::_SUCCESS if succeed, else FrameworkReturnCode::_ERROR_
+    FrameworkReturnCode getRectificationParameters(const std::pair<uint32_t, uint32_t>& pairCameraIds,
+                                                   std::vector<SolAR::datastructure::RectificationParameters>& rectParams) const override;
 
     org::bcom::xpcf::XPCFErrorCode onConfigured() override;
     void unloadComponent () override final;
@@ -88,6 +90,8 @@ private:
     rs2::frameset m_frameset;
 	/// camera parameters
 	std::vector<datastructure::CameraParameters> m_camParameters;
+    /// rectification parameters
+    std::map< std::pair<uint32_t, uint32_t>, std::vector<SolAR::datastructure::RectificationParameters>> m_rectParams;
 	/// number of cameras
 	int	m_nbCameras = 2;
 	/// width of image

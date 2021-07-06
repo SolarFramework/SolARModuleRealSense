@@ -44,11 +44,6 @@ SolARStereoCameraRealsense::~SolARStereoCameraRealsense()
 	LOG_DEBUG("SolARStereoCameraRealsense destructor");
 }
 
-void SolARStereoCameraRealsense::setParameters(const int & camera_id, const datastructure::CameraParameters & parameters)
-{
-	LOG_INFO("Cannot set paramters for cameras of Realsense");
-}
-
 org::bcom::xpcf::XPCFErrorCode SolARStereoCameraRealsense::onConfigured()
 {
 	return xpcf::XPCFErrorCode::_SUCCESS;
@@ -119,6 +114,22 @@ FrameworkReturnCode SolARStereoCameraRealsense::start()
 		m_camParameters[0].distortion(i) = infrared1Intrinsic.coeffs[i];
 		m_camParameters[1].distortion(i) = infrared2Intrinsic.coeffs[i];
 	}
+
+	// get extrinsic parameters
+	rs2_extrinsics infrared1To2Extrinsic = infrared1_stream.get_extrinsics_to(infrared2_stream);
+	std::vector<RectificationParameters> rectParams(2);
+	for (int i = 0; i < 2; ++i) {
+		rectParams[i].baseline = std::abs(infrared1To2Extrinsic.translation[0]);
+		rectParams[i].camParams = m_camParameters[i];		
+		rectParams[i].fb = rectParams[i].baseline * m_camParameters[i].intrinsic(0, 0);
+		rectParams[i].rotation.setIdentity();
+		rectParams[i].type = StereoType::Horizontal;
+		for (int r = 0; r < 3; ++r)
+			for (int c = 0; c < 3; ++c)
+				rectParams[i].projection(r, c) = m_camParameters[i].intrinsic(r, c);
+	}
+	rectParams[1].projection(0, 3) = infrared1To2Extrinsic.translation[0] * m_camParameters[1].intrinsic(0, 0);
+	m_rectParams[std::make_pair(0, 1)] = rectParams;
 	LOG_INFO("The camera device is now opened and configured");
 	return FrameworkReturnCode();
 }
@@ -164,7 +175,20 @@ FrameworkReturnCode SolARStereoCameraRealsense::getData(std::vector<SRef<datastr
 
 const datastructure::CameraParameters & SolARStereoCameraRealsense::getParameters(const int & camera_id) const
 {
-	return m_camParameters[camera_id];
+	if (camera_id < 0 || camera_id >= m_camParameters.size())
+		LOG_ERROR("Not existed camera id: {}", camera_id)
+	else
+		return m_camParameters[camera_id];
+}
+
+FrameworkReturnCode SolARStereoCameraRealsense::getRectificationParameters(const std::pair<uint32_t, uint32_t>& pairCameraIds, std::vector<SolAR::datastructure::RectificationParameters>& rectParams) const
+{
+    auto it = m_rectParams.find(pairCameraIds);
+    if (it == m_rectParams.end())
+        return FrameworkReturnCode::_ERROR_;
+    else
+        rectParams = it->second;
+    return FrameworkReturnCode::_SUCCESS;
 }
 
 }
