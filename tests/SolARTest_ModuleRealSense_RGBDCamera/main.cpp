@@ -24,9 +24,6 @@
 #include "xpcf/xpcf.h"
 #include "core/Log.h"
 
-// ADD MODULES TRAITS HEADERS HERE
-#include "SolARModuleOpencv_traits.h"
-#include "SolARModuleRealSense_traits.h"
 
 // ADD COMPONENTS HEADERS HERE
 #include "api/input/devices/IRGBDCamera.h"
@@ -39,8 +36,6 @@
 using namespace SolAR;
 using namespace SolAR::datastructure;
 using namespace SolAR::api;
-using namespace SolAR::MODULES::REALSENSE;
-using namespace SolAR::MODULES::OPENCV;
 
 namespace xpcf  = org::bcom::xpcf;
 
@@ -64,8 +59,8 @@ int main(int argc, char *argv[])
 		// declare and create components
 		LOG_INFO("Start creating components");
 		auto camera = xpcfComponentManager->resolve<input::devices::IRGBDCamera>();
-		auto viewerRGB = xpcfComponentManager->create<SolARImageViewerOpencv>("color")->bindTo<display::IImageViewer>();
-		auto viewerDepth = xpcfComponentManager->create<SolARImageViewerOpencv>("depth")->bindTo<display::IImageViewer>();
+        auto viewerRGB = xpcfComponentManager->resolve<display::IImageViewer>("color");
+        auto viewerDepth = xpcfComponentManager->resolve<display::IImageViewer>("depth");
 		LOG_INFO("Components created");
 
 		if (!camera || !viewerRGB || !viewerDepth) {
