@@ -44,6 +44,11 @@ SolARStereoCameraRealsense::~SolARStereoCameraRealsense()
 	LOG_DEBUG("SolARStereoCameraRealsense destructor");
 }
 
+const SolAR::datastructure::CameraRigParameters & SolARStereoCameraRealsense::getCameraParameters() const
+{
+	return m_camRigParameters;
+}
+
 org::bcom::xpcf::XPCFErrorCode SolARStereoCameraRealsense::onConfigured()
 {
 	return xpcf::XPCFErrorCode::_SUCCESS;
@@ -89,47 +94,59 @@ FrameworkReturnCode SolARStereoCameraRealsense::start()
 	auto infrared2_stream = pipeline_profile.get_stream(RS2_STREAM_INFRARED, 2).as<rs2::video_stream_profile>();
 	rs2_intrinsics infrared1Intrinsic = infrared1_stream.get_intrinsics();
 	rs2_intrinsics infrared2Intrinsic = infrared2_stream.get_intrinsics();
-	m_camParameters.resize(2);
+	std::vector<CameraParameters> camParameters(2);
+	// set id
+	camParameters[0].id = 0;
+	camParameters[1].id = 1;
+	//set name
+	camParameters[0].name = "Infrared 1";
+	camParameters[1].name = "Infrared 2";
+
 	// set resolution
-	m_camParameters[0].resolution.width = infrared1Intrinsic.width;
-	m_camParameters[0].resolution.height = infrared1Intrinsic.height;
-	m_camParameters[1].resolution.width = infrared2Intrinsic.width;
-	m_camParameters[1].resolution.height = infrared2Intrinsic.height;
+	camParameters[0].resolution.width = infrared1Intrinsic.width;
+	camParameters[0].resolution.height = infrared1Intrinsic.height;
+	camParameters[1].resolution.width = infrared2Intrinsic.width;
+	camParameters[1].resolution.height = infrared2Intrinsic.height;
 
 	// set intrinsic
-	m_camParameters[0].intrinsic = CamCalibration::Identity();
-	m_camParameters[0].intrinsic(0, 0) = infrared1Intrinsic.fx;
-	m_camParameters[0].intrinsic(1, 1) = infrared1Intrinsic.fy;
-	m_camParameters[0].intrinsic(0, 2) = infrared1Intrinsic.ppx;
-	m_camParameters[0].intrinsic(1, 2) = infrared1Intrinsic.ppy;
+	camParameters[0].intrinsic = CamCalibration::Identity();
+	camParameters[0].intrinsic(0, 0) = infrared1Intrinsic.fx;
+	camParameters[0].intrinsic(1, 1) = infrared1Intrinsic.fy;
+	camParameters[0].intrinsic(0, 2) = infrared1Intrinsic.ppx;
+	camParameters[0].intrinsic(1, 2) = infrared1Intrinsic.ppy;
 
-	m_camParameters[1].intrinsic = CamCalibration::Identity();
-	m_camParameters[1].intrinsic(0, 0) = infrared2Intrinsic.fx;
-	m_camParameters[1].intrinsic(1, 1) = infrared2Intrinsic.fy;
-	m_camParameters[1].intrinsic(0, 2) = infrared2Intrinsic.ppx;
-	m_camParameters[1].intrinsic(1, 2) = infrared2Intrinsic.ppy;
+	camParameters[1].intrinsic = CamCalibration::Identity();
+	camParameters[1].intrinsic(0, 0) = infrared2Intrinsic.fx;
+	camParameters[1].intrinsic(1, 1) = infrared2Intrinsic.fy;
+	camParameters[1].intrinsic(0, 2) = infrared2Intrinsic.ppx;
+	camParameters[1].intrinsic(1, 2) = infrared2Intrinsic.ppy;
 
 	// set distortion
 	for (int i = 0; i < 5; ++i) {
-		m_camParameters[0].distortion(i) = infrared1Intrinsic.coeffs[i];
-		m_camParameters[1].distortion(i) = infrared2Intrinsic.coeffs[i];
+		camParameters[0].distortion(i) = infrared1Intrinsic.coeffs[i];
+		camParameters[1].distortion(i) = infrared2Intrinsic.coeffs[i];
 	}
 
 	// get extrinsic parameters
 	rs2_extrinsics infrared1To2Extrinsic = infrared1_stream.get_extrinsics_to(infrared2_stream);
+	Transform3Df transformation = Transform3Df::Identity();
+	transformation(0, 3) = infrared1To2Extrinsic.translation[0];
 	std::vector<RectificationParameters> rectParams(2);
 	for (int i = 0; i < 2; ++i) {
 		rectParams[i].baseline = std::abs(infrared1To2Extrinsic.translation[0]);
-		rectParams[i].camParams = m_camParameters[i];		
-		rectParams[i].fb = rectParams[i].baseline * m_camParameters[i].intrinsic(0, 0);
 		rectParams[i].rotation.setIdentity();
 		rectParams[i].type = StereoType::Horizontal;
 		for (int r = 0; r < 3; ++r)
 			for (int c = 0; c < 3; ++c)
-				rectParams[i].projection(r, c) = m_camParameters[i].intrinsic(r, c);
+				rectParams[i].projection(r, c) = camParameters[i].intrinsic(r, c);
 	}
-	rectParams[1].projection(0, 3) = infrared1To2Extrinsic.translation[0] * m_camParameters[1].intrinsic(0, 0);
-	m_rectParams[std::make_pair(0, 1)] = rectParams;
+	rectParams[1].projection(0, 3) = infrared1To2Extrinsic.translation[0] * camParameters[1].intrinsic(0, 0);
+
+	// set parameters to rig
+	m_camRigParameters.cameraParams[0] = camParameters[0];
+	m_camRigParameters.cameraParams[1] = camParameters[1];
+	m_camRigParameters.transformations[std::make_pair(0, 1)] = transformation;
+	m_camRigParameters.rectificationParams[std::make_pair(0, 1)] = std::make_pair(rectParams[0], rectParams[1]);
 	LOG_INFO("The camera device is now opened and configured");
 	return FrameworkReturnCode();
 }
@@ -152,11 +169,6 @@ FrameworkReturnCode SolARStereoCameraRealsense::stop()
 	}
 }
 
-int SolARStereoCameraRealsense::getNbCameras()
-{
-	return m_nbCameras;
-}
-
 FrameworkReturnCode SolARStereoCameraRealsense::getData(std::vector<SRef<datastructure::Image>>& images, std::vector<datastructure::Transform3Df>& poses, std::chrono::system_clock::time_point & timestamp)
 {
 	images.clear();
@@ -171,24 +183,6 @@ FrameworkReturnCode SolARStereoCameraRealsense::getData(std::vector<SRef<datastr
 	images.push_back(frameToImage(infrared1Frame));
 	images.push_back(frameToImage(infrared2Frame));
 	return FrameworkReturnCode::_SUCCESS;
-}
-
-const datastructure::CameraParameters & SolARStereoCameraRealsense::getParameters(const int & camera_id) const
-{
-	if (camera_id < 0 || camera_id >= m_camParameters.size())
-		LOG_ERROR("Not existed camera id: {}", camera_id)
-	else
-		return m_camParameters[camera_id];
-}
-
-FrameworkReturnCode SolARStereoCameraRealsense::getRectificationParameters(const std::pair<uint32_t, uint32_t>& pairCameraIds, std::vector<SolAR::datastructure::RectificationParameters>& rectParams) const
-{
-    auto it = m_rectParams.find(pairCameraIds);
-    if (it == m_rectParams.end())
-        return FrameworkReturnCode::_ERROR_;
-    else
-        rectParams = it->second;
-    return FrameworkReturnCode::_SUCCESS;
 }
 
 }

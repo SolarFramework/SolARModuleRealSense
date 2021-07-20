@@ -76,25 +76,20 @@ int main(int argc, char *argv[])
 		}
 
 		// get intrinsic parameters
-		CameraParameters param1 = camera->getParameters(0);
-		CameraParameters param2 = camera->getParameters(1);
+		CameraRigParameters cameraRigParams = camera->getCameraParameters();
+		CameraParameters param1 = cameraRigParams.cameraParams[0];
+		CameraParameters param2 = cameraRigParams.cameraParams[1];
 		LOG_INFO("Camera 1 parameters:\nResolution: {} x {}\nIntrinsic:\n{}\nDistortion:\n{}",
 			param1.resolution.width, param1.resolution.height, param1.intrinsic, param1.distortion);
 		LOG_INFO("Camera 2 parameters:\nResolution: {} x {}\nIntrinsic:\n{}\nDistortion:\n{}",
 			param2.resolution.width, param2.resolution.height, param2.intrinsic, param2.distortion);
 
 		// get rectification parameters
-		std::vector<RectificationParameters> rectParams;
-		LOG_INFO("Rectification parameters:");
-		if (camera->getRectificationParameters(std::make_pair(0, 1), rectParams) == FrameworkReturnCode::_SUCCESS) {
-			LOG_INFO("Baseline: {}", rectParams[0].baseline);
-			LOG_INFO("fb: {}", rectParams[0].fb);
-			LOG_INFO("Type: {}", rectParams[0].type);
-			for (int i = 0; i < 2; ++i)
-				LOG_INFO("Camera {} parameters:\nRotation:\n{}\nProjection:\n{}", i, rectParams[i].rotation, rectParams[i].projection);
-		}
-		else
-			LOG_WARNING("Not existed rectification between camera 0 and 1");
+		std::pair<RectificationParameters, RectificationParameters> rectParams = cameraRigParams.rectificationParams[std::make_pair(0, 1)];
+		LOG_INFO("Baseline: {}", rectParams.first.baseline);
+		LOG_INFO("Type: {}", rectParams.first.type);
+		LOG_INFO("Camera 1 rectification parameters:\nRotation:\n{}\nProjection:\n{}", rectParams.first.rotation, rectParams.first.projection);
+		LOG_INFO("Camera 2 rectification parameters:\nRotation:\n{}\nProjection:\n{}", rectParams.second.rotation, rectParams.second.projection);
 
 		while (true) {
 			camera->getData(images, poses, timestamp);	

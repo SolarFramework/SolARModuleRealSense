@@ -49,10 +49,6 @@ public:
 	/// @return FrameworkReturnCode::_SUCCESS if successful, eiher FrameworkReturnCode::_ERROR_.
 	FrameworkReturnCode stop() override;
 
-	/// @brief Get number of cameras of the device.
-	/// @return the number of cameras.
-	int getNbCameras() override;
-
 	/// @brief Retrieve a set of images and their associated poses from the sensors as well as timestamp.
 	/// @param[out] images: the captured images.
 	/// @param[out] poses: the associated poses.
@@ -60,17 +56,9 @@ public:
 	/// @return FrameworkReturnCode to track successful or failing event.
 	FrameworkReturnCode getData(std::vector<SRef<datastructure::Image>> & images, std::vector<datastructure::Transform3Df> & poses, std::chrono::system_clock::time_point &timestamp) override;
 
-	/// @brief Get the distortion and intrinsic camera parameters
-	/// @param[in] camera_id: The id of the camera.
-	/// @return the camera parameters
-	const datastructure::CameraParameters & getParameters(const int & camera_id) const override;
-
-    /// @brief Get the rectification parameters of a stereo camera
-    /// @param[in] pairCameraIds The pair ids of the stereo camera.
-    /// @param[out] rectParams The vector of rectification parameters of the stereo camera
-    /// @return FrameworkReturnCode::_SUCCESS if succeed, else FrameworkReturnCode::_ERROR_
-    FrameworkReturnCode getRectificationParameters(const std::pair<uint32_t, uint32_t>& pairCameraIds,
-                                                   std::vector<SolAR::datastructure::RectificationParameters>& rectParams) const override;
+	/// @brief Get parameters of a camera rig
+	/// @return the camera rig parameters
+	const SolAR::datastructure::CameraRigParameters & getCameraParameters() const override;
 
     org::bcom::xpcf::XPCFErrorCode onConfigured() override;
     void unloadComponent () override final;
@@ -89,9 +77,7 @@ private:
 	/// Last frameset available
     rs2::frameset m_frameset;
 	/// camera parameters
-	std::vector<datastructure::CameraParameters> m_camParameters;
-    /// rectification parameters
-    std::map< std::pair<uint32_t, uint32_t>, std::vector<SolAR::datastructure::RectificationParameters>> m_rectParams;
+	SolAR::datastructure::CameraRigParameters m_camRigParameters;
 	/// number of cameras
 	int	m_nbCameras = 2;
 	/// width of image
