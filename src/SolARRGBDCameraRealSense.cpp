@@ -370,14 +370,14 @@ Point2Di SolARRGBDCamera::getWorldToPixel(const CloudPoint& in3DPoint) const
         return pixel;
 }
 
-std::vector<Point2Df> SolARRGBDCamera::getWorldToPixels (const std::vector<datastructure::CloudPoint>& in3DPoints) const
+std::vector<Point2Df> SolARRGBDCamera::getWorldToPixels (const std::vector<SRef<datastructure::CloudPoint>>& in3DPoints) const
 {
         std::vector<Point2Df> out2DPoints;
 
         for( const auto& pt : in3DPoints )
         {
-            auto pti = getWorldToPixel( pt );
-            out2DPoints.push_back( Point2Df( pti.x(), pti.y() ) );
+            auto pti = getWorldToPixel( *pt );
+            out2DPoints.push_back(Point2Df(pti.x(), pti.y()));
         }
 
         return out2DPoints;

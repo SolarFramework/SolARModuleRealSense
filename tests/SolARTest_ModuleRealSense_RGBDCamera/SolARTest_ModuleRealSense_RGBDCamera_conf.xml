@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <xpcf-registry autoAlias="true">
-	<module uuid="63b92983-f790-448b-8124-3b686d481aaf" name="SolARModuleRealSense" description="RealSense modules" path="$XPCF_MODULE_ROOT/SolARBuild/SolARModuleRealSense/0.9.3/lib/x86_64/shared">
+	<module uuid="63b92983-f790-448b-8124-3b686d481aaf" name="SolARModuleRealSense" description="RealSense modules" path="$XPCF_MODULE_ROOT/SolARBuild/SolARModuleRealSense/0.10.0/lib/x86_64/shared">
 		<component uuid="315dfef4-26f3-4a79-a809-874b1006cd88" name="SolARRGBDCamera" description="A component to handle a Real Sense RGBD Camera">
-                <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
-                <interface uuid="5bf56174-94fd-4256-8eb7-b653ea3b8c34" name="IRGBDCamera" description="Interface for RGBD camera"/>
-				<interface uuid="6dfcb3c7-3432-418b-8f69-e66df55bbb67" name="IDepthCamera" description="Interface for Depth camera"/>
-				<interface uuid="5DDC7DF0-8377-437F-9C81-3643F7676A5B" name="ICamera" description="ICamera interface"/>
+			<interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
+			<interface uuid="5bf56174-94fd-4256-8eb7-b653ea3b8c34" name="IRGBDCamera" description="Interface for RGBD camera"/>
+			<interface uuid="6dfcb3c7-3432-418b-8f69-e66df55bbb67" name="IDepthCamera" description="Interface for Depth camera"/>
+			<interface uuid="5DDC7DF0-8377-437F-9C81-3643F7676A5B" name="ICamera" description="ICamera interface"/>
         </component>
     </module>
-	<module uuid="15e1990b-86b2-445c-8194-0cbe80ede970" name="SolARModuleOpenCV" description="OpenCV" path="$XPCF_MODULE_ROOT/SolARBuild/SolARModuleOpenCV/0.9.3/lib/x86_64/shared">
+	<module uuid="15e1990b-86b2-445c-8194-0cbe80ede970" name="SolARModuleOpenCV" description="OpenCV" path="$XPCF_MODULE_ROOT/SolARBuild/SolARModuleOpenCV/0.10.0/lib/x86_64/shared">
 		<component uuid="19ea4e13-7085-4e3f-92ca-93f200ffb01b" name="SolARImageViewerOpencv" description="SolARImageViewerOpencv">
-                <interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
-                <interface uuid="b05f3dbb-f93d-465c-aee1-fb58e1480c42" name="IImageViewer" description="IImageViewer"/>
+			<interface uuid="125f2007-1bf9-421d-9367-fbdc1210d006" name="IComponentIntrospect" description="IComponentIntrospect"/>
+			<interface uuid="b05f3dbb-f93d-465c-aee1-fb58e1480c42" name="IImageViewer" description="IImageViewer"/>
         </component>
     </module>
 	<factory>
