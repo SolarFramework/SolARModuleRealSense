@@ -6,7 +6,9 @@
 *.lo
 *.o
 *.obj
-build/
+*build/
+*build-rules*
+deploy
 
 # Precompiled Headers
 *.gch
